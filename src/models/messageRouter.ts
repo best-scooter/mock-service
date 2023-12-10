@@ -4,15 +4,14 @@ import { connection } from 'websocket';
 import { validate } from "jsonschema";
 
 import incomingMsgs from "./incomingMsgs";
-import type { MessageData } from '../types/MessageData'
-import { dataSchema } from "../jsonschemas/messageData";
-import Client from "../classes/Client";
+import messageData from "../jsonschemas/messageData";
+import Client from "../classes/Scooter";
 
 // **** Variables **** //
 
 // **** Helper functions **** //
 
-function _messageParser(message: Message, conn: connection): MessageData | null {
+function _messageParser(message: Message, conn: connection) {
     if (message.type === 'binary') {
         conn.sendUTF('Unable to parse binary message.')
         logger.warn('Unable to parse binary message.');
@@ -29,7 +28,7 @@ function _messageParser(message: Message, conn: connection): MessageData | null 
         conn.sendUTF('Unable to parse message: ' + message.utf8Data);
     }
 
-    if (validate(data, dataSchema)) {
+    if (validate(data, messageData.dataSchema)) {
         // conn.sendUTF('Parsed message: ' + JSON.stringify(data));
         return data;
     }
@@ -48,24 +47,8 @@ function messageRouter(client: Client) {
         if (!data) { return; }
 
         switch (data.message) {
-            case "customer":
-                incomingMsgs.receiveCustomer(data, client);
-                break;
             case "scooter":
                 incomingMsgs.receiveScooter(data, client);
-                break;
-            case "tripStart":
-                incomingMsgs.receiveTripStart(data, client);
-                break;
-            case "tripEnd":
-                incomingMsgs.receiveTripEnd(data, client);
-                break;
-            case "trip":
-                incomingMsgs.receiveTrip(data, client);
-                break;
-            case "subscribe":
-                incomingMsgs.subscribe(data, client);
-                // pass
                 break;
             default:
                 client.connection.sendUTF("Unknown message.");

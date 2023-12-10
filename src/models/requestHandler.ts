@@ -4,9 +4,8 @@ import logger from 'jet-logger'
 import { requestVerification } from './requestVerification';
 import { messageRouter } from './messageRouter';
 import { clientStore } from '../server';
-import Client from '../classes/Client';
-import { systemState } from './systemState';
-import { sendScooter, sendCustomer } from './outgoingMsgs';
+import Scooter from '../classes/Scooter';
+import outgoingMsgs from './outgoingMsgs';
 
 // **** Variables **** //
 
@@ -21,29 +20,10 @@ function _onAllMessages(message: Message) {
     }
 }
 
-function _onClose(this: {client: Client}) {
-    const scooterId = this.client.info.scooterId;
-    const customerId = this.client.info.customerId;
-
-    if (this.client.type === "scooter" && typeof scooterId === "number") {
-        systemState.removeClientData("scooters", scooterId);
-        sendScooter({
-            message: "scooter",
-            scooterId,
-            remove: true
-        });
-    } else if (this.client.type === "customer" && typeof customerId === "number") {
-        systemState.removeClientData("customers", customerId);
-        sendCustomer({
-            message: "customer",
-            customerId,
-            remove: true
-        });
-    }
-
-    // remove client from the client store
-    clientStore.remove(this.client);
-    logger.info('Peer ' + this.client.connection.remoteAddress + ' disconnected.');
+function _onClose(this: {scooter: Scooter}) {
+    // remove scooter from the client store
+    clientStore.removeScooter(this.scooter);
+    logger.info('Peer ' + this.scooter.info + ' disconnected.');
 }
 
 // **** Functions **** //
@@ -61,16 +41,16 @@ function requestHandler(request: request) {
     }
 
     const conn = request.accept(null, request.origin);
-    const client = new Client(conn, token);
+    const scooter = new Scooter(conn, token);
 
     // Add the client to the client store
-    clientStore.add(client);
+    clientStore.addScooter(scooter);
     logger.info('Connection ' + conn.remoteAddress + ' accepted.');
     // conn.on('message', _onAllMessages);
-    conn.on('close', _onClose.bind({client}));
+    conn.on('close', _onClose.bind({scooter}));
 
     // Main function to set up message logic
-    messageRouter(client);
+    messageRouter(scooter);
 }
 
 // **** Exports **** //

@@ -168,7 +168,7 @@ const dataSubscribeSchema = {
     "required": ["message", "subscriptions"]
 }
 
-export {
+export default {
     dataSchema,
     dataCustomerSchema,
     dataScooterSchema,

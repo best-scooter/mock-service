@@ -1,64 +1,48 @@
-import Client from "./Client";
+import Scooter from "./Scooter";
+import Customer from "./Customer";
+import type Client from "./Client";
 
 class ClientStore {
-    _all: Array<Client> = [];
-    _subscribed: {
-        [subscription: string]: Array<Client>
-    } = {
-        customer: [],
-        scooter: [],
-        scooterLimited: [],
-        trip: []
-    }
+    _scooters: Array<Scooter> = [];
+    _customers: Array<Customer> = [];
 
     get all(): Array<Client> {
-        return this._all;
+        const all: Array<Client> = [];
+        return all.concat(this._customers).concat(this._scooters);
     }
 
-    get subscribed(): {
-        [subscription: string]: Array<Client>
-    } {
-        return this._subscribed;
+    get scooters() {
+        return this._scooters;
     }
 
-    add(client: Client): void {
-        if (this._all.indexOf(client) === -1) {
-            this._all.push(client);
+    get customers() {
+        return this._customers;
+    }
+
+    addScooter(scooter: Scooter) {
+        if (this._scooters.indexOf(scooter) === -1) {
+            this._scooters.push(scooter);
         }
     }
 
-    remove(client: Client): void {
-        // remove all entries in the all array
-        for (let i = 0; i < this._all.length; i++) {
-            if (this._all[i] === client) {
-                this._all.splice(i, 1);
-            }
-        }
-
-        // remove all entries in all subscriptions
-        for (const list of Object.keys(this._subscribed)) {
-            this.removeSubscribed(client, list);
-        }
-    }
-
-    addSubscribed(client: Client, list: string): void {
-        if (list in this._subscribed) {
-            const subscribedArr = this._subscribed[list]
-
-            if (subscribedArr.indexOf(client) === -1) {
-                subscribedArr.push(client);
+    removeScooter(scooter: Scooter) {
+        for (let i = 0; i < this._scooters.length; i++) {
+            if (this._scooters[i] === scooter) {
+                this._scooters.splice(i, 1);
             }
         }
     }
 
-    removeSubscribed(client: Client, list: string): void {
-        if (list in this._subscribed) {
-            const subscribers = this._subscribed[list];
+    addCustomer(customer: Customer) {
+        if (this._customers.indexOf(customer) === -1) {
+            this._customers.push(customer);
+        }
+    }
 
-            for (let i = 0; i < subscribers.length; i++) {
-                if (client === subscribers[i]) {
-                    subscribers.splice(i, 1);
-                }
+    removeCustomer(customer: Customer) {
+        for (let i = 0; i < this._customers.length; i++) {
+            if (this._customers[i] === customer) {
+                this._customers.splice(i, 1);
             }
         }
     }
