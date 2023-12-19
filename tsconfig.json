@@ -75,6 +75,7 @@
   "include": [
     "src/**/*.ts",
     "spec/**/*.ts",
+    "types/**/*.d.ts",
     "build.ts"
   ],
   "exclude": []
