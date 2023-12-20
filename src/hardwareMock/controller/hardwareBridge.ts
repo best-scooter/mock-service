@@ -5,6 +5,7 @@
 
 import Batteries from "../model/types/batteries"
 import GPSES from "../model/types/gpses"
+import Position from "../model/types/position"
 import RedLights from "../model/types/redLights"
 import Speedometers from "../model/types/speedometers"
 const fs = require('fs')
@@ -35,7 +36,7 @@ export default {
      */
     writeNewBattery: function (scooterId: number, newBattery: number): void {
         batteries[scooterId] = newBattery
-        fs.writeFileSync(basePath + "battery", newBattery, writeFileFlag)
+        fs.writeFileSync(basePath + "battery", batteries, writeFileFlag)
     },
 
     /**
@@ -43,7 +44,7 @@ export default {
      * @param {number} scooterId 
      * @returns {array} [latitude, longitude]
      */
-    getPositionFor: function (scooterId: number): Array<number> {
+    getPositionFor: function (scooterId: number): Position {
         const currentPosition = gpses[scooterId]
         return currentPosition
     },
@@ -53,9 +54,9 @@ export default {
      * @param {number} scooterId
      * @param {array} newPosition [latitude, longitude]
      */
-    writeNewPosition: function (scooterId: number, newPosition: Array<number>): void {
+    writeNewPosition: function (scooterId: number, newPosition: Position): void {
         gpses[scooterId] = newPosition
-        fs.writeFileSync(basePath + "gps", newPosition, writeFileFlag)
+        fs.writeFileSync(basePath + "gps", gpses, writeFileFlag)
     },
 
     /**
@@ -65,7 +66,7 @@ export default {
      */
     writeNewSpeed: function (scooterId: number, newSpeed: number): void {
         speedometers[scooterId] = newSpeed
-        fs.writeFileSync(basePath + "speedometer", newSpeed, writeFileFlag)
+        fs.writeFileSync(basePath + "speedometer", speedometers, writeFileFlag)
     },
 
     /**
@@ -85,6 +86,6 @@ export default {
      */
     writeNewLight: function (scooterId: number, newLight: string): void {
         redlights[scooterId] = newLight
-        fs.writeFileSync(basePath + "redLight", newLight, writeFileFlag)
+        fs.writeFileSync(basePath + "redLight", redlights, writeFileFlag)
     }
 }

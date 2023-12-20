@@ -1,12 +1,12 @@
 import hardwareBridge from "../controller/hardwareBridge"
-
+import Position from "./types/position"
 
 export default {
     /**
      * Update the battery level. Can decrease between a random value of 0.01 and 0.05 (1-5%).
      * @param {number} scooterId 
      */
-    updateBattery: function (scooterId: number): void {
+    decreaseBattery: function (scooterId: number): void {
         const currentBattery = hardwareBridge.getBatteryFor(scooterId)
 
         const min = 0.01
@@ -18,13 +18,30 @@ export default {
     },
 
     /**
+     * Simulates the battery being fully charged after a ten minute timer has passed
+     * @param {number} scooterId 
+     */
+    chargeBattery: function (scooterId: number): void {
+        const tenMinutesInMilliSec = 600000
+
+        setTimeout(() => {
+            this.setBatteryFull(scooterId)
+        }, tenMinutesInMilliSec)
+    },
+
+    setBatteryFull: function (scooterId: number): void {
+        const battery = 1
+        hardwareBridge.writeNewBattery(scooterId, battery)
+    },
+
+    /**
      * Updates latitude and longitude between +/- 0.03 degrees.
      * @param {number} scooterId 
      */
     updatePosition: function (scooterId: number): void {
         const currentPosition = hardwareBridge.getPositionFor(scooterId)
-        const latitude = currentPosition[0]
-        const longitude = currentPosition[1]
+        const latitude = currentPosition.x
+        const longitude = currentPosition.y
 
         const max = 0.03
         const latitudeChange = this.getRandomNumber(max)
@@ -41,9 +58,10 @@ export default {
             newLongitude = longitude - longitudeChange
         }
 
-        const newPosition = []
-        newPosition.push(newLatitude)
-        newPosition.push(newLongitude)
+        const newPosition: Position = {
+            x: newLatitude,
+            y: newLongitude
+        }
 
         hardwareBridge.writeNewPosition(scooterId, newPosition)
 
@@ -60,7 +78,16 @@ export default {
     },
 
     /**
-     * Check if the scooter's lamp is on or off
+     * Set the current speed to 0.
+     * @param {number} scooterId 
+     */
+    setSpeedZero: function (scooterId: number): void {
+        const speed = 0
+        hardwareBridge.writeNewSpeed(scooterId, speed)
+    },
+
+    /**
+     * Check if the scooter's lamp is on or off.
      * @param {number} scooterId 
      * @returns {string} "On" or "off"
      */
@@ -70,7 +97,7 @@ export default {
     },
 
     /**
-     * Get a random number
+     * Get a random number.
      * @param {number} min Default 0
      * @param {number} max Default 1
      * @returns {number} A random number betwween min and max

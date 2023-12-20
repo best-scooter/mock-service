@@ -1,5 +1,7 @@
+import position from "./position";
+
 type GPSES = {
-    [scooterId: number]: Array<number>;
+    [scooterId: number]: position;
     // [scooterId: number]: [x: number, y: number]
 }
 
