@@ -13,5 +13,6 @@ export default {
   AdminUsername: (process.env.ADMIN_USERNAME ?? ""),
   AdminPassword: (process.env.ADMIN_PASSWORD ?? ""),
   NrOfCustomers: parseInt(process.env.NR_OF_CUSTOMERS ?? ""),
-  WsHost: (process.env.WS_HOST ?? "")
+  WsHost: (process.env.WS_HOST ?? ""),
+  ORSApiKey: (process.env.ORS_API_KEY ?? "")
 } as const;
