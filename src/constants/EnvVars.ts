@@ -14,5 +14,7 @@ export default {
   AdminPassword: (process.env.ADMIN_PASSWORD ?? ""),
   NrOfCustomers: parseInt(process.env.NR_OF_CUSTOMERS ?? ""),
   WsHost: (process.env.WS_HOST ?? ""),
-  ORSApiKey: (process.env.ORS_API_KEY ?? "")
+  ORSApiKey: (process.env.ORS_API_KEY ?? ""),
+  RefreshDelay: parseInt(process.env.REFRESH_DELAY ?? ""),
+  WalkingSpeed: parseFloat(process.env.WALKING_SPEED ?? "")
 } as const;

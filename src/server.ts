@@ -39,9 +39,10 @@ const adminToken = fetch(EnvVars.ApiHost + "v1/admin/token", {
     return result.data.token;
 });
 
-customerSystem.populate(clientStore).then(() => {
+customerSystem.populate(clientStore).then(async () => {
     logger.info("Successfully connected " + clientStore.customers.length + " customers.");
-    customerSystem.initiate(clientStore);
+    await customerSystem.createFakeScooters();
+    await customerSystem.initiate(clientStore);
 });
 
 wsServer.on('request', requestHandler);

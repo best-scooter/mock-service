@@ -12,7 +12,7 @@ import Client from "./Client";
 
 class Scooter extends Client {
     scooterId: number;
-    position: Array<Number>;
+    position: Array<number>;
 
     constructor(connection: connection, token: string) {
         super(connection, token)

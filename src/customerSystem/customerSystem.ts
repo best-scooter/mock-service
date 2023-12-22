@@ -1,12 +1,14 @@
 import WebSocket from 'websocket';
 import logger from 'jet-logger';
 import randomPointsOnPolygon from 'random-points-on-polygon';
-import { point, polygon } from '@turf/helpers';
+import * as turf from '@turf/turf';
 
 import EnvVars from "../constants/EnvVars";
 import Customer from '../classes/Customer';
+import Scooter from '../classes/Scooter';
 import ClientStore from '../classes/ClientStore';
-import apiRequests from '@src/models/apiRequests';
+import apiRequests from '../models/apiRequests';
+import { clientStore } from '../server';
 
 export default {
     /**
@@ -60,7 +62,7 @@ export default {
     _getCityFeature: async function(zoneId: number) {
         const cityZone = await apiRequests.getZone(zoneId);
         const cityPolygon = [cityZone.area.concat(cityZone.area[0])];
-        return polygon(cityPolygon);
+        return turf.polygon(cityPolygon);
     },
 
     /**
@@ -72,23 +74,23 @@ export default {
         const customers = clientStore.customers;
         const points: Array<Array<number>> = [];
 
-        // Use zoneId 7 for Göteborg
-        const cityIds = [7]
+        // Use zoneId 7 for Göteborg or 8 for downtown Göteborg
+        const zoneIds = [8]
 
-        for (const zoneId of cityIds) {
+        for (const zoneId of zoneIds) {
             // Get a city as a GeoJSON feature
             const cityFeature = await this._getCityFeature(zoneId);
 
             // Divide amount of customers by amount of cities
             // to evenly distribute customers in all cities
-            const pointAmount = Math.ceil(customers.length / cityIds.length)
+            const pointAmount = Math.ceil(customers.length / zoneIds.length)
 
             // Randomise necessary amount of points inside city
             const pointFeatures = randomPointsOnPolygon(pointAmount, cityFeature)
     
             // Puts all points in a simple array
             for (const pointFeature of Object.values(pointFeatures)) {
-                points.push(pointFeature.geometry.coordinates);
+                points.push(pointFeature.geometry.coordinates.reverse());
             }
         }
 
@@ -111,6 +113,33 @@ export default {
 
             // Initiate decision making strategy
             customer.initiate();
+        }
+    },
+
+    async createFakeScooters() {
+        for (let i = 1; i < 10; i++) {
+            const result = await apiRequests.postScooterToken(i, i.toString());
+            const token = result.data.token;
+            const scooterWs = new WebSocket.client();
+
+            scooterWs.connect(EnvVars.WsHost, undefined, undefined, {
+                "sec-websocket-protocol": token
+            });
+
+            scooterWs.on('connect', (connection) => {
+                const scooter = new Scooter(connection, token)
+
+                scooter.position = [11.950866, 57.697146]
+                clientStore.addScooter(scooter);
+
+                connection.on('error', function(error) {
+                    logger.warn("Connection Error: " + error.toString());
+                });
+            })
+
+            scooterWs.on('connectFailed', function(error) {
+                logger.warn('Connect Error: ' + error.toString());
+            });
         }
     }
 }

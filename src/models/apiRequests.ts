@@ -125,11 +125,28 @@ async function postCustomerToken(customerEmail: string) {
     return await response.json();
 }
 
+/**
+ * Gets a scooter JWT for authorisation
+ * @param {number} scooterId Scooter ID
+ * @param {string} password Password
+ * @returns {Promise<Object>}
+ */
+async function postScooterToken(scooterId: number, password: string) {
+    const response = await _httpPost(
+        EnvVars.ApiHost + "v1/scooter/token",
+        {scooterId, password},
+        ""
+    );
+
+    return await response.json();
+}
+
 // **** Exports **** //
 
 export default {
     putScooter,
     putCustomer,
     getZone,
-    postCustomerToken
+    postCustomerToken,
+    postScooterToken
 }
