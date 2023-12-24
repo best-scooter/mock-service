@@ -1,6 +1,5 @@
 import WebSocket from 'websocket';
 import logger from 'jet-logger';
-import randomPointsOnPolygon from 'random-points-on-polygon';
 import * as turf from '@turf/turf';
 
 import EnvVars from "../constants/EnvVars";
@@ -9,6 +8,12 @@ import Scooter from '../classes/Scooter';
 import ClientStore from '../classes/ClientStore';
 import apiRequests from '../models/apiRequests';
 import { clientStore } from '../server';
+import SmartCustomerStrategy from '../classes/SmartCustomerStrategy';
+import SimpleCustomerStrategy from '../classes/SimpleCustomerStrategy';
+import PreparedCustomerStrategy from '../classes/PreparedCustomerStrategy';
+import helpers from '@src/utils/helpers';
+import zoneStore from '@src/models/zoneStore';
+import Strategy from '@src/classes/Strategy';
 
 export default {
     /**
@@ -78,19 +83,14 @@ export default {
         const zoneIds = [8]
 
         for (const zoneId of zoneIds) {
-            // Get a city as a GeoJSON feature
-            const cityFeature = await this._getCityFeature(zoneId);
-
             // Divide amount of customers by amount of cities
             // to evenly distribute customers in all cities
             const pointAmount = Math.ceil(customers.length / zoneIds.length)
 
-            // Randomise necessary amount of points inside city
-            const pointFeatures = randomPointsOnPolygon(pointAmount, cityFeature)
-    
-            // Puts all points in a simple array
-            for (const pointFeature of Object.values(pointFeatures)) {
-                points.push(pointFeature.geometry.coordinates.reverse());
+            const zone = zoneStore.getZone(zoneId);
+
+            for (const point of helpers.getRandomPositions(zone, pointAmount)) {
+                points.push(point)
             }
         }
 
@@ -105,14 +105,28 @@ export default {
             apiRequests.putCustomer(
                 customer.customerId,
                 {
-                    positionX: startPosition[0],
-                    positionY: startPosition[1]
+                    positionY: startPosition[0],
+                    positionX: startPosition[1]
+                    
                 }, 
                 customer.token
             );
 
             // Initiate decision making strategy
-            customer.initiate();
+            let strategy: Strategy;
+
+            if (customer.customerId <= 20) {
+                strategy = new SmartCustomerStrategy(customer)
+            } else if (customer.customerId <= 200) {
+                strategy = new PreparedCustomerStrategy(customer)
+            } else {
+                strategy = new SimpleCustomerStrategy(customer);
+            }
+
+            const stagger = Math.random() * EnvVars.RefreshDelay;
+            helpers.wait(stagger).then(() => {
+                customer.initiate(strategy);
+            });
         }
     },
 
@@ -129,7 +143,7 @@ export default {
             scooterWs.on('connect', (connection) => {
                 const scooter = new Scooter(connection, token)
 
-                scooter.position = [11.950866, 57.697146]
+                scooter.position = [57.696920, 11.950950]
                 clientStore.addScooter(scooter);
 
                 connection.on('error', function(error) {

@@ -1,6 +1,8 @@
 import EnvVars from "../constants/EnvVars";
 import { adminToken } from "../server";
 
+import type Trip from '../types/Trip';
+
 // **** Variables **** //
 
 // **** Helper functions **** //
@@ -111,6 +113,24 @@ async function getZone(zoneId: number) {
 }
 
 /**
+ * Get all zones
+ * @returns {*} The zone data
+ */
+async function getZones() {
+    return await fetch(EnvVars.ApiHost + 'v1/zone/', {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Access-Token": await adminToken
+        }
+    }).then((response) => {
+        return response.json();
+    }).then((result) => {
+        return result.data;
+    })
+}
+
+/**
  * Gets a customer JWT for authorisation
  * @param {string} customerEmail E-mail of customer
  * @returns {Promise<Object>}
@@ -141,12 +161,49 @@ async function postScooterToken(scooterId: number, password: string) {
     return await response.json();
 }
 
+/**
+ * Posts a new trip
+ * @param {number} customerId Customer ID
+ * @param {number} scooterId Scooter ID
+ * @param {Array<number>} startPosition Start position of the trip expressed as [lon, lat]or [y, x]  coordinates
+ * @returns {Promise<any>}
+ */
+async function postTrip(customerId: number, scooterId: number, startPosition: Array<number>, token: string): Promise<{"data": Trip}> {
+    const response = await _httpPost(
+        EnvVars.ApiHost + "v1/trip/0",
+        {customerId, scooterId, startPosition},
+        token
+    );
+
+    return await response.json();
+}
+
+/**
+ * Put trip update
+ * @param {number} tripId Trip id
+ * @param {any} data New trip data
+ * @param {string} token JWT to use for the request
+ * @returns {Promise<any>}
+ */
+async function putTrip(tripId: number, data: any, token: string): Promise<Response> {
+    const response = await _httpPut(
+        EnvVars.ApiHost + "v1/trip/" + tripId,
+        data,
+        token
+    );
+
+    return response;
+}
+
 // **** Exports **** //
 
 export default {
     putScooter,
     putCustomer,
     getZone,
+    getZones,
     postCustomerToken,
-    postScooterToken
+    postScooterToken,
+    postTrip,
+    putTrip
 }

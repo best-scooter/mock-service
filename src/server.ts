@@ -11,6 +11,7 @@ import { requestHandler } from './models/requestHandler';
 import customerSystem from './customerSystem/customerSystem'
 import EnvVars from './constants/EnvVars';
 import Customer from './classes/Customer';
+import zoneStore from './models/zoneStore';
 
 // // **** Setup **** //
 
@@ -44,6 +45,8 @@ customerSystem.populate(clientStore).then(async () => {
     await customerSystem.createFakeScooters();
     await customerSystem.initiate(clientStore);
 });
+
+zoneStore.populate();
 
 wsServer.on('request', requestHandler);
 
