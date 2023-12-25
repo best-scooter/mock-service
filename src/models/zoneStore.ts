@@ -1,6 +1,6 @@
 import * as turf from '@turf/turf';
 
-import type Zone from "../types/Zone"
+import type Zone from "../types/ZoneType"
 import apiRequests from "./apiRequests";
 import { NoZoneFoundError } from '../classes/Errors';
 

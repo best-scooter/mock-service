@@ -13,7 +13,7 @@ class Client {
     connection: connection;
     token: string;
     info: string;
-    _position: Array<number>
+    _position: [number, number]
 
     constructor(connection: connection, token: string) {
         this.token = token;
@@ -26,7 +26,7 @@ class Client {
         return this._position;
     }
 
-    set position(value: Array<number>) {
+    set position(value: [number, number]) {
         this._position = value;
     }
 }

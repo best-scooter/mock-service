@@ -6,10 +6,10 @@ import Customer from "./Customer";
 import Strategy from "./Strategy";
 import helpers from "../utils/helpers";
 import EnvVars from "../constants/EnvVars";
-import MoverStrategy from "./MoverStrategy";
+import MoverStrategy from "./Strategy";
 import { NoRouteFoundError, NoScooterFoundError, NoTripFoundError, TooShortRouteError } from "./Errors";
 
-class PreparedCustomerStrategy extends MoverStrategy implements Strategy {
+class PreparedCustomerStrategy extends Strategy {
     client: Customer;
 
     constructor(customer: Customer) {

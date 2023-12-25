@@ -12,7 +12,6 @@ import Client from "./Client";
 
 class Scooter extends Client {
     scooterId: number;
-    _position: Array<number>;
     available: boolean;
     maxSpeed: number;
 
@@ -27,7 +26,6 @@ class Scooter extends Client {
 
         this.scooterId = payload.scooterId;
         this.info = "Scooter " + payload.scooterId;
-        this._position = [0,0];
         this.available = true;
         this.maxSpeed = 20;
     }

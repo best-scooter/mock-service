@@ -1,7 +1,7 @@
 import EnvVars from "../constants/EnvVars";
 import { adminToken } from "../server";
 
-import type Trip from '../types/Trip';
+import type Trip from '../types/TripType';
 
 // **** Variables **** //
 

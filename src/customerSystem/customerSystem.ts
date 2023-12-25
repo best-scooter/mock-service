@@ -77,7 +77,7 @@ export default {
      */
     initiate: async function(clientStore: ClientStore) {
         const customers = clientStore.customers;
-        const points: Array<Array<number>> = [];
+        const points: Array<[number, number]> = [];
 
         // Use zoneId 7 for Göteborg or 8 for downtown Göteborg
         const zoneIds = [8]

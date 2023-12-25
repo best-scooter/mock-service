@@ -1,4 +1,4 @@
-type Zone = {
+type ZoneType = {
     id: number,
     zoneId: number,
     type: string,
@@ -10,4 +10,4 @@ type Zone = {
     maxSpeed: number
 }
 
-export default Zone;
+export default ZoneType;

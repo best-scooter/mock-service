@@ -5,11 +5,11 @@ import randomPointsOnPolygon from 'random-points-on-polygon';
 import logger from 'jet-logger';
 
 import EnvVars from '../constants/EnvVars';
-import Zone from '../types/Zone';
+import Zone from '../types/ZoneType';
 import { NoRouteFoundError } from '../classes/Errors';
 
 export default {
-    async getRouteTo(startCoordinates: Array<number>, targetCoordinates: Array<Number>) {
+    async getRouteTo(startCoordinates: [number, number], targetCoordinates: [number, number]) {
         const orsDirections = new Openrouteservice.Directions({
             api_key: EnvVars.ORSApiKey
         });
@@ -27,9 +27,9 @@ export default {
 
             const route = response.features[0].geometry.coordinates;
 
-            return route.map((item: Array<number>) => {
+            return route.map((item: [number, number]) => {
                 return item.reverse();
-            });
+            }) as Array<[number, number]>;
         } catch (err) {
             logger.info("An error occurred getting route from Openrouteservice. Error response code: " + err.status)
             logger.err(JSON.stringify(await err.response.json()))
@@ -41,7 +41,7 @@ export default {
         return new Promise(resolve => setTimeout(resolve, ms));
     },
 
-    getDistance(positionA: Array<number>, positionB: Array<number>) {
+    getDistance(positionA: [number, number], positionB: [number, number]) {
         const pointA = turf.point([
             positionA[0],
             positionA[1]
@@ -55,11 +55,11 @@ export default {
         return distance;
     },
 
-    getCenter(area: Array<Array<number>>) {
+    getCenter(area: Array<[number, number]>) {
         const poly = turf.polygon([[...area, area[0]]])
         const point = turf.centroid(poly);
 
-        return point.geometry.coordinates;
+        return point.geometry.coordinates as [number, number];
     },
 
     getRandomPositions(zone: Zone, amount?: number) {
@@ -71,15 +71,15 @@ export default {
             holder.push(point.geometry.coordinates);
         }
 
-        return holder as Array<Array<number>>;
+        return holder as Array<[number, number]>;
     },
 
-    getRandomDestination(origin: Array<number>, distance: number) {
+    getRandomDestination(origin: [number, number], distance: number) {
         const pt = turf.point(origin);
         const bearing = (Math.random() * 360) - 180;
         const dist = distance / 1000;
         const destinationPt = turf.destination(pt, dist, bearing);
 
-        return destinationPt.geometry.coordinates;
+        return destinationPt.geometry.coordinates as [number, number];
     }
 }

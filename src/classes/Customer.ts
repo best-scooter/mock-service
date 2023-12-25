@@ -32,7 +32,7 @@ class Customer extends Client {
         this.strategy = null;
     }
 
-    set position(value: Array<number>) {
+    set position(value: [number, number]) {
         this._position = value;
         this.connection.send(JSON.stringify({
             message: "customer",

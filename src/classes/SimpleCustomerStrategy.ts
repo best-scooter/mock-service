@@ -8,10 +8,9 @@ import helpers from "../utils/helpers";
 import EnvVars from "../constants/EnvVars";
 import apiRequests from "../models/apiRequests";
 import zoneStore from "../models/zoneStore";
-import MoverStrategy from "./MoverStrategy";
 import { NoRouteFoundError, NoScooterFoundError, NoTripFoundError, TooShortRouteError } from "./Errors";
 
-class SimpleCustomerStrategy extends MoverStrategy implements Strategy {
+class SimpleCustomerStrategy extends Strategy {
     client: Customer;
 
     constructor(customer: Customer) {

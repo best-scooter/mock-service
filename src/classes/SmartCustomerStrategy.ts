@@ -10,13 +10,10 @@ import { clientStore } from "../server";
 import EnvVars from "../constants/EnvVars";
 import apiRequests from "../models/apiRequests";
 import zoneStore from "../models/zoneStore";
-import type Trip from "../types/Trip";
-import MoverStrategy from "./MoverStrategy";
+import Trip from "./Trip";
 
-class SmartCustomerStrategy extends MoverStrategy implements Strategy {
+class SmartCustomerStrategy extends Strategy {
     client: Customer;
-    trip: Trip|null;
-    scooter: Scooter|null;
 
     constructor(customer: Customer) {
         super(customer);
@@ -38,14 +35,7 @@ class SmartCustomerStrategy extends MoverStrategy implements Strategy {
         }
 
         if (this.trip) {
-            apiRequests.putTrip(this.trip.id, {
-                endPosition: this.client.position,
-                timeEnded: new Date().toISOString()
-            }, this.client.token)
-            this.client.connection.send(JSON.stringify({
-                message: "tripEnd",
-                tripId: this.trip.id
-            }));
+            this.trip.destroy();
             this.trip = null;
         }
 
@@ -138,17 +128,7 @@ class SmartCustomerStrategy extends MoverStrategy implements Strategy {
             this.client.position,
             this.client.token
         );
-        const trip = result.data;
-
-        scooter.available = false;
-        this.client.connection.send(JSON.stringify({
-            message: "trip",
-            scooterId: scooter.scooterId,
-            customerId: this.client.customerId,
-            tripId: trip.tripId,
-            route: [this.client.position],
-            distance: 0
-        }));
+        const trip = new Trip(this.client, scooter, result.data);
 
         return trip;
     }
@@ -160,7 +140,7 @@ class SmartCustomerStrategy extends MoverStrategy implements Strategy {
         const scooterSpeed = scooter.maxSpeed;
         // choose the lowest max speed
         const speed = (zoneSpeed < scooterSpeed && zoneSpeed) || scooterSpeed;
-        let route: Array<Array<number>>;
+        let route: Array<[number, number]>;
 
         if (!this.scooter) {
             throw new NoScooterFoundError();
@@ -181,11 +161,7 @@ class SmartCustomerStrategy extends MoverStrategy implements Strategy {
 
         this.trip = await this.startTrip(this.scooter);
 
-        if (!this.trip) {
-            return false;
-        }
-
-        await this.move(speed, route, target, scooter, this.trip?.id);
+        await this.move(speed, route, target);
 
         apiRequests.putTrip(this.trip.tripId, {
                 timeEnded: new Date().toISOString(),
@@ -218,8 +194,8 @@ class SmartCustomerStrategy extends MoverStrategy implements Strategy {
         return parkingZone;
     }
 
-    private async goToDestination(destination: Array<number>) {
-        let route: Array<Array<number>>;
+    private async goToDestination(destination: [number, number]) {
+        let route: Array<[number, number]>;
 
         try {
             route = await helpers.getRouteTo(this.client.position, destination)

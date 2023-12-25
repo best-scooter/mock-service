@@ -1,4 +1,4 @@
-type Trip = { 
+type TripType = { 
     id: number,
     tripId: number,
     customerId: number,
@@ -15,4 +15,4 @@ type Trip = {
     priceDistance: number
 }
 
-export default Trip;
+export default TripType;
