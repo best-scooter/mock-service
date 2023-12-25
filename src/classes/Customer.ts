@@ -3,9 +3,7 @@ import jwt from 'jsonwebtoken';
 
 import EnvVars from "../constants/EnvVars";
 import Client from "./Client";
-import Strategy from "./Strategy";
-import SmartCustomerStrategy from "./SmartCustomerStrategy";
-import apiRequests from "@src/models/apiRequests";
+import CustomerStrategy from "./CustomerStrategy";
 
 // **** Variables **** //
 
@@ -16,7 +14,7 @@ import apiRequests from "@src/models/apiRequests";
 class Customer extends Client {
     customerId: number;
     customerEmail: string;
-    strategy: Strategy|null;
+    strategy: CustomerStrategy|null;
 
     constructor(connection: connection, token: string) {
         super(connection, token)
@@ -46,7 +44,7 @@ class Customer extends Client {
         return this._position;
     }
 
-    initiate(strategy: Strategy) {
+    initiate(strategy: CustomerStrategy) {
         this.strategy = strategy;
         this.strategy.initiate();
     }

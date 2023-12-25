@@ -47,12 +47,12 @@ class Trip {
         });
     }
 
-    destroy() {
+    async end() {
         const now = new Date().toISOString();
 
         this.timeEnded = now;
 
-        apiRequests.putTrip(this.id, {
+        await apiRequests.putTrip(this.id, {
             endPosition: this.customer.position,
             timeEnded: now
         }, this.customer.token)
@@ -99,11 +99,11 @@ class Trip {
         this.send({routeAppend: value});
     }
 
-    update(routeAppend: Array<[number, number]>, distance: number) {
+    async update(routeAppend: Array<[number, number]>, distance: number) {
         this._route = this.route.concat(routeAppend);
         this._distance = distance;
 
-        this.send({routeAppend, distance});
+        await this.send({routeAppend, distance});
     }
 
     private wsSend(data: object) {
@@ -116,13 +116,13 @@ class Trip {
         }))
     }
 
-    private apiSend(data: object) {
-        apiRequests.putTrip(this.id, data, this.customer.token)
+    private async apiSend(data: object) {
+        await apiRequests.putTrip(this.id, data, this.customer.token)
     }
 
-    private send(data: object) {
+    private async send(data: object) {
         this.wsSend(data);
-        this.apiSend(data);
+        await this.apiSend(data);
     }
 }
 

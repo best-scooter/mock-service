@@ -1,9 +1,10 @@
 import logger from "jet-logger";
-import * as turf from "@turf/turf";
+// @ts-ignore
+import nodeCleanup from 'node-cleanup';
 
 import Scooter from "./Scooter";
 import Customer from "./Customer";
-import Strategy from "./Strategy";
+import CustomerStrategy from "./CustomerStrategy";
 import { NoRouteFoundError, NoScooterFoundError, NoTripFoundError, TooShortRouteError } from "./Errors";
 import helpers from "../utils/helpers";
 import { clientStore } from "../server";
@@ -12,22 +13,9 @@ import apiRequests from "../models/apiRequests";
 import zoneStore from "../models/zoneStore";
 import Trip from "./Trip";
 
-class SmartCustomerStrategy extends Strategy {
-    client: Customer;
-
-    constructor(customer: Customer) {
-        super(customer);
-        this.client = customer;
-        this.trip = null;
-        this.scooter = null;
-    }
-
-    initiate() {
-        this.main();
-    }
-
+class SmartCustomerStrategy extends CustomerStrategy {
     private async reinitiate(reason: string) {
-        logger.info(`Reinitiating customer ${this.client.customerId} decision strategy with reason: ${reason}`);
+        logger.info(`Reinitiating customer ${this.customer.customerId} decision strategy with reason: ${reason}`);
 
         if (this.scooter) {
             this.scooter.available = true;
@@ -35,15 +23,14 @@ class SmartCustomerStrategy extends Strategy {
         }
 
         if (this.trip) {
-            this.trip.destroy();
+            await this.trip.end();
             this.trip = null;
         }
 
         await helpers.wait(EnvVars.RefreshDelay);
-        // this.initiate();
     }
 
-    private async main() {
+    protected async main() {
         while (true) {
             this.scooter = this.getNearbyScooter();
             if (!this.scooter) {
@@ -63,7 +50,7 @@ class SmartCustomerStrategy extends Strategy {
                 continue;
             }
 
-            const destination = helpers.getRandomDestination(this.client.position, 200)
+            const destination = helpers.getRandomDestination(this.customer.position, 200)
             if (!destination) {
                 await this.reinitiate("Could not find random destination.")
                 continue;
@@ -75,7 +62,7 @@ class SmartCustomerStrategy extends Strategy {
                 continue;
             }
 
-            this.reinitiate("Destination reached.")
+            await this.reinitiate("Destination reached.")
         }
     }
 
@@ -83,7 +70,7 @@ class SmartCustomerStrategy extends Strategy {
         let route;
 
         try {
-            route = await helpers.getRouteTo(this.client.position, scooter.position);
+            route = await helpers.getRouteTo(this.customer.position, scooter.position);
         } catch (error) {
             if (
                 error instanceof NoRouteFoundError ||
@@ -98,7 +85,6 @@ class SmartCustomerStrategy extends Strategy {
         if (!route) { return false; }
 
         await this.move(EnvVars.WalkingSpeed, route, scooter.position);
-        // }
 
         return true;
     }
@@ -110,7 +96,7 @@ class SmartCustomerStrategy extends Strategy {
         for (const scooter of clientStore._scooters) {
             if (!scooter.available) { continue; }
 
-            const distance = helpers.getDistance(this.client.position, scooter.position);
+            const distance = helpers.getDistance(this.customer.position, scooter.position);
 
             if (distance < closestDistance) {
                 closestDistance = distance;
@@ -123,12 +109,27 @@ class SmartCustomerStrategy extends Strategy {
 
     private async startTrip(scooter: Scooter) {
         const result = await apiRequests.postTrip(
-            this.client.customerId,
+            this.customer.customerId,
             scooter.scooterId,
-            this.client.position,
-            this.client.token
+            this.customer.position,
+            this.customer.token
         );
-        const trip = new Trip(this.client, scooter, result.data);
+        const trip = new Trip(this.customer, scooter, result.data);
+
+        // nodeCleanup((exitCode: number, signal: string) => {
+        //     if (signal) {
+        //         trip.end().then(function () {
+        //             // calling process.exit() won't inform parent process of signal
+        //             process.kill(process.pid, signal);
+        //         });
+        //         nodeCleanup.uninstall(); // don't call cleanup handler again
+        //         return false;
+        //     }
+        // });
+
+        // process.on('SIGINT', () => {
+        //     trip.end();
+        // });
 
         return trip;
     }
@@ -136,7 +137,7 @@ class SmartCustomerStrategy extends Strategy {
     private async goToZone(scooter: Scooter): Promise<boolean> {
         const targetZone = await this.getRandomParkingZone();
         const target = helpers.getCenter(targetZone.area);
-        const zoneSpeed = zoneStore.getZoneMaxSpeed(this.client.position);
+        const zoneSpeed = zoneStore.getZoneMaxSpeed(this.customer.position);
         const scooterSpeed = scooter.maxSpeed;
         // choose the lowest max speed
         const speed = (zoneSpeed < scooterSpeed && zoneSpeed) || scooterSpeed;
@@ -147,7 +148,7 @@ class SmartCustomerStrategy extends Strategy {
         }
 
         try {
-            route = await helpers.getRouteTo(this.client.position, target)
+            route = await helpers.getRouteTo(this.customer.position, target)
         } catch (error) {
             if (
                 error instanceof NoRouteFoundError ||
@@ -163,17 +164,10 @@ class SmartCustomerStrategy extends Strategy {
 
         await this.move(speed, route, target);
 
-        apiRequests.putTrip(this.trip.tripId, {
-                timeEnded: new Date().toISOString(),
-                endPosition: this.client.position
-        }, this.client.token)
-
-        this.client.connection.send(JSON.stringify({
-            message: "tripEnd",
-            tripId: this.trip.tripId
-        }))
-
+        await this.trip.end();
         this.trip = null;
+        this.scooter.available = true;
+        this.scooter = null;
 
         return true;
     }
@@ -198,7 +192,7 @@ class SmartCustomerStrategy extends Strategy {
         let route: Array<[number, number]>;
 
         try {
-            route = await helpers.getRouteTo(this.client.position, destination)
+            route = await helpers.getRouteTo(this.customer.position, destination)
         } catch (error) {
             if (
                 error instanceof NoRouteFoundError ||

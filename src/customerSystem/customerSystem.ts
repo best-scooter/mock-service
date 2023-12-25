@@ -11,9 +11,9 @@ import { clientStore } from '../server';
 import SmartCustomerStrategy from '../classes/SmartCustomerStrategy';
 import SimpleCustomerStrategy from '../classes/SimpleCustomerStrategy';
 import PreparedCustomerStrategy from '../classes/PreparedCustomerStrategy';
-import helpers from '@src/utils/helpers';
-import zoneStore from '@src/models/zoneStore';
-import Strategy from '@src/classes/Strategy';
+import helpers from '../utils/helpers';
+import zoneStore from '../models/zoneStore';
+import CustomerStrategy from '../classes/CustomerStrategy';
 
 export default {
     /**
@@ -113,15 +113,17 @@ export default {
             );
 
             // Initiate decision making strategy
-            let strategy: Strategy;
+            let strategy: CustomerStrategy;
 
-            if (customer.customerId <= 20) {
-                strategy = new SmartCustomerStrategy(customer)
-            } else if (customer.customerId <= 200) {
-                strategy = new PreparedCustomerStrategy(customer)
-            } else {
-                strategy = new SimpleCustomerStrategy(customer);
-            }
+            // if (customer.customerId <= 20) {
+            //     strategy = new SmartCustomerStrategy(customer)
+            // } else if (customer.customerId <= 200) {
+            //     strategy = new PreparedCustomerStrategy(customer)
+            // } else {
+            //     strategy = new SimpleCustomerStrategy(customer);
+            // }
+
+            strategy = new SmartCustomerStrategy(customer);
 
             const stagger = Math.random() * EnvVars.RefreshDelay;
             helpers.wait(stagger).then(() => {
