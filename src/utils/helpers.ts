@@ -72,5 +72,14 @@ export default {
         }
 
         return holder as Array<Array<number>>;
+    },
+
+    getRandomDestination(origin: Array<number>, distance: number) {
+        const pt = turf.point(origin);
+        const bearing = (Math.random() * 360) - 180;
+        const dist = distance / 1000;
+        const destinationPt = turf.destination(pt, dist, bearing);
+
+        return destinationPt.geometry.coordinates;
     }
 }

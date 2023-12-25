@@ -27,6 +27,8 @@ class MoverStrategy {
             return endPosition;
         }
 
+        const refreshInSeconds = EnvVars.RefreshDelay / 1000;
+        const distancePerRefresh = speed * refreshInSeconds * EnvVars.SpeedMultiplier;
         const line = turf.lineString(route);
         const lineLength = turf.lineDistance(line) * 1000;
         let totalDistance = 0;
@@ -42,9 +44,6 @@ class MoverStrategy {
 
         return new Promise(async (resolve, reject) => {
             while (totalDistance < lineLength) {
-                // refreshes according refreshdelay +- 0.5s
-                const refreshInSeconds = EnvVars.RefreshDelay / 1000;
-                const distancePerRefresh = speed * refreshInSeconds;
                 totalDistance += distancePerRefresh;
 
                 const pointFeature = turf.along(
@@ -57,15 +56,22 @@ class MoverStrategy {
                 this.client.position = pointFeature.geometry.coordinates;
 
                 if (tripId && scooter) {
+                    const distance = Math.round((totalDistance < lineLength && totalDistance) || lineLength);
                     scooter.position = this.client.position;
                     apiRequests.putTrip(
                         tripId,
                         {
                             routeAppend: [this.client.position],
-                            distance: (totalDistance < lineLength && totalDistance) || lineLength
+                            distance
                         },
                         this.client.token
-                    )
+                    );
+                    this.client.connection.send(JSON.stringify({
+                        message: "trip",
+                        tripId: tripId,
+                        routeAppend: [this.client.position],
+                        distance
+                    }));
                 }
 
                 if (totalDistance < lineLength) {

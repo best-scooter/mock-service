@@ -16,5 +16,6 @@ export default {
   WsHost: (process.env.WS_HOST ?? ""),
   ORSApiKey: (process.env.ORS_API_KEY ?? ""),
   RefreshDelay: parseInt(process.env.REFRESH_DELAY ?? ""),
-  WalkingSpeed: parseFloat(process.env.WALKING_SPEED ?? "")
+  WalkingSpeed: parseFloat(process.env.WALKING_SPEED ?? ""),
+  SpeedMultiplier: parseFloat(process.env.SPEED_MULTIPLIER ?? "")
 } as const;

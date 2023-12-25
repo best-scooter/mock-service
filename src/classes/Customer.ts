@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import EnvVars from "../constants/EnvVars";
 import Client from "./Client";
 import Strategy from "./Strategy";
+import SmartCustomerStrategy from "./SmartCustomerStrategy";
+import apiRequests from "@src/models/apiRequests";
 
 // **** Variables **** //
 
