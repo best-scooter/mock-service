@@ -84,7 +84,7 @@ class SmartCustomerStrategy extends CustomerStrategy {
 
         if (!route) { return false; }
 
-        await this.move(EnvVars.WalkingSpeed, route, scooter.position);
+        await this.move(route, scooter.position);
 
         return true;
     }
@@ -137,10 +137,6 @@ class SmartCustomerStrategy extends CustomerStrategy {
     private async goToZone(scooter: Scooter): Promise<boolean> {
         const targetZone = await this.getRandomParkingZone();
         const target = helpers.getCenter(targetZone.area);
-        const zoneSpeed = zoneStore.getZoneMaxSpeed(this.customer.position);
-        const scooterSpeed = scooter.maxSpeed;
-        // choose the lowest max speed
-        const speed = (zoneSpeed < scooterSpeed && zoneSpeed) || scooterSpeed;
         let route: Array<[number, number]>;
 
         if (!this.scooter) {
@@ -162,7 +158,7 @@ class SmartCustomerStrategy extends CustomerStrategy {
 
         this.trip = await this.startTrip(this.scooter);
 
-        await this.move(speed, route, target);
+        await this.move(route, target);
 
         await this.trip.end();
         this.trip = null;
@@ -204,7 +200,7 @@ class SmartCustomerStrategy extends CustomerStrategy {
             }
         }
 
-        await this.move(EnvVars.WalkingSpeed, route, destination);
+        await this.move(route, destination);
 
         return true;
     }

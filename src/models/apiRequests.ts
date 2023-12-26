@@ -1,3 +1,5 @@
+import logger from 'jet-logger';
+
 import EnvVars from "../constants/EnvVars";
 import { adminToken } from "../server";
 
@@ -15,16 +17,19 @@ import type Trip from '../types/TripType';
  * @returns {Response}
  */
 function _httpPut(url: string, data: any, token: string) {
-    return fetch(url, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Access-Token": token
-        },
-        body: JSON.stringify(data)
-    }).then((response) => {
-        return response;
-    })
+    try {
+        return fetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Access-Token": token
+            },
+            body: JSON.stringify(data)
+        });
+    } catch(error) {
+        logger.err(error);
+        return new Response();
+    }
 }
 
 /**
@@ -35,14 +40,19 @@ function _httpPut(url: string, data: any, token: string) {
  * @returns {Response}
  */
 function _httpPost(url: string, data: any, token: string) {
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Access-Token": token
-        },
-        body: JSON.stringify(data)
-    });
+    try {
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Access-Token": token
+            },
+            body: JSON.stringify(data)
+        });
+    } catch(error) {
+        logger.err(error);
+        return new Response();
+    }
 }
 
 /**
@@ -52,13 +62,18 @@ function _httpPost(url: string, data: any, token: string) {
  * @returns {Response}
  */
 function _httpGet(url: string, token: string) {
-    return fetch(url, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Access-Token": token
-        }
-    });
+    try {
+        return fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Access-Token": token
+            }
+        });
+    } catch(error) {
+        logger.err(error);
+        return new Response();
+    }
 }
 
 // **** Functions **** //
@@ -99,17 +114,10 @@ async function putCustomer(customerId: number, data: any, token: string) {
  * @returns {*} The zone data
  */
 async function getZone(zoneId: number) {
-    return await fetch(EnvVars.ApiHost + 'v1/zone/' + zoneId, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Access-Token": await adminToken
-        }
-    }).then((response) => {
-        return response.json();
-    }).then((result) => {
-        return result.data;
-    })
+    const response = await _httpGet(EnvVars.ApiHost + 'v1/zone/' + zoneId, await adminToken)
+    const result = await response.json();
+
+    return await result.data;
 }
 
 /**
@@ -117,17 +125,10 @@ async function getZone(zoneId: number) {
  * @returns {*} The zone data
  */
 async function getZones() {
-    return await fetch(EnvVars.ApiHost + 'v1/zone/', {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Access-Token": await adminToken
-        }
-    }).then((response) => {
-        return response.json();
-    }).then((result) => {
-        return result.data;
-    })
+    const response = await _httpGet(EnvVars.ApiHost + 'v1/zone/', await adminToken);
+    const result = await response.json();
+
+    return result.data;
 }
 
 /**

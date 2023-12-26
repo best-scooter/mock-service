@@ -7,6 +7,7 @@ import Client from './Client';
 import Customer from './Customer';
 import Trip from './Trip';
 import helpers from '../utils/helpers';
+import zoneStore from '../models/zoneStore';
 
 abstract class CustomerStrategy {
     customer: Customer
@@ -28,13 +29,20 @@ abstract class CustomerStrategy {
     }
 
     protected move(
-        speed: number,
         route: Array<[number, number]>,
         endPosition: [number, number]
     ) {
         return new Promise(async (resolve, reject) => {
             if (route.length < 2) {
                 return resolve(endPosition);
+            }
+
+            let speed: number = this.customer.walkingSpeed;
+            if (this.scooter) {
+                const zoneSpeed = zoneStore.getZoneMaxSpeed(this.customer.position);
+                const scooterSpeed = this.scooter.maxSpeed;
+                // choose the lowest max speed
+                speed = (zoneSpeed < scooterSpeed && zoneSpeed) || scooterSpeed;
             }
 
             const refreshInSeconds = EnvVars.RefreshDelay / 1000;
@@ -44,11 +52,12 @@ abstract class CustomerStrategy {
             let totalDistance = 0;
             let id = this.customer.customerId;
 
-            logger.info(`Customer ${id} starts a new journey with total length: ${Math.round(lineLength)}m.`)
+            // logger.info(`Customer ${id} starts a new journey with total length: ${Math.round(lineLength)}m.`)
 
             while (totalDistance < lineLength) {
                 totalDistance += distancePerRefresh;
-
+                // console.log(distancePerRefresh);
+                // console.log(totalDistance);
                 const pointFeature = turf.along(
                     line,
                     totalDistance / 1000
@@ -65,7 +74,7 @@ abstract class CustomerStrategy {
                     this.scooter.position = this.customer.position;
                 }
 
-                logger.info(`Customer ${id} has travelled ${totalDistance}m.`)
+                // logger.info(`Customer ${id} has travelled ${totalDistance}m.`)
 
                 if (totalDistance < lineLength) {
                     await helpers.wait(EnvVars.RefreshDelay);

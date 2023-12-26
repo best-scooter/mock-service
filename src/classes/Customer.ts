@@ -15,6 +15,7 @@ class Customer extends Client {
     customerId: number;
     customerEmail: string;
     strategy: CustomerStrategy|null;
+    walkingSpeed: number;
 
     constructor(connection: connection, token: string) {
         super(connection, token)
@@ -28,6 +29,7 @@ class Customer extends Client {
         this.customerEmail = payload.customerEmail;
         this.info = "Customer " + payload.customerEmail;
         this.strategy = null;
+        this.walkingSpeed = EnvVars.WalkingSpeed + Math.random() - 0.5
     }
 
     set position(value: [number, number]) {

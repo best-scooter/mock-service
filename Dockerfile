@@ -3,14 +3,18 @@ FROM node:20
 WORKDIR /server
 
 COPY dist/* ./dist/
+COPY dist/assets/* ./dist/assets/
 COPY dist/classes/* ./dist/classes/
 COPY dist/constants/* ./dist/constants/
+COPY dist/customerSystem/* ./dist/customerSystem/
+COPY dist/hardwareMock/* ./dist/hardwareMock/
 COPY dist/jsonschemas/* ./dist/jsonschemas/
 COPY dist/models/* ./dist/models/
 COPY dist/types/* ./dist/types/
+COPY dist/utils/* ./dist/utils/
 COPY package*.json ./
 
-EXPOSE 8081
+EXPOSE 8082
 
 RUN npm install
 

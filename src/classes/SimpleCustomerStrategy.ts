@@ -23,7 +23,7 @@ class SimpleCustomerStrategy extends CustomerStrategy {
             const targetPosition = positions[0];
             const route = [this.customer.position, targetPosition];
 
-            await this.move(EnvVars.WalkingSpeed, route, targetPosition);
+            await this.move(route, targetPosition);
 
             await this.reinitiate("Destination reached.")
         }

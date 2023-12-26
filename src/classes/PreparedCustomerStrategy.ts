@@ -25,7 +25,7 @@ class PreparedCustomerStrategy extends CustomerStrategy {
             const targetPosition = prepared.target;
             this.customer.position = prepared.start;
 
-            await this.move(EnvVars.WalkingSpeed, route, targetPosition);
+            await this.move(route, targetPosition);
 
             await this.reinitiate("Destination reached.")
         }

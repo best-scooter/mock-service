@@ -114,16 +114,18 @@ export default {
 
             // Initiate decision making strategy
             let strategy: CustomerStrategy;
+            const smartAmount = EnvVars.NrOfSmartCustomers;
+            const preparedAmount = EnvVars.NrOfPreparedCustomers;
 
-            // if (customer.customerId <= 20) {
-            //     strategy = new SmartCustomerStrategy(customer)
-            // } else if (customer.customerId <= 200) {
-            //     strategy = new PreparedCustomerStrategy(customer)
-            // } else {
-            //     strategy = new SimpleCustomerStrategy(customer);
-            // }
+            if (customer.customerId <= smartAmount) {
+                strategy = new SmartCustomerStrategy(customer)
+            } else if (customer.customerId <= smartAmount + preparedAmount) {
+                strategy = new PreparedCustomerStrategy(customer)
+            } else {
+                strategy = new SimpleCustomerStrategy(customer);
+            }
 
-            strategy = new SmartCustomerStrategy(customer);
+            // strategy = new PreparedCustomerStrategy(customer);
 
             const stagger = Math.random() * EnvVars.RefreshDelay;
             helpers.wait(stagger).then(() => {

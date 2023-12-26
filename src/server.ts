@@ -41,9 +41,11 @@ const adminToken = fetch(EnvVars.ApiHost + "v1/admin/token", {
 });
 
 customerSystem.populate(clientStore).then(async () => {
-    logger.info("Successfully connected " + clientStore.customers.length + " customers.");
+    logger.info(`Successfully connected ${clientStore.customers.length} customers and a ${EnvVars.RefreshDelay}ms refresh frequency.`);
     await customerSystem.createFakeScooters();
     await customerSystem.initiate(clientStore);
+    const simpleAmount = EnvVars.NrOfCustomers - EnvVars.NrOfSmartCustomers - EnvVars.NrOfPreparedCustomers
+    logger.info(`Started ${EnvVars.NrOfSmartCustomers} smart, ${EnvVars.NrOfPreparedCustomers} prepared and ${simpleAmount} simple customers with a x${EnvVars.SpeedMultiplier} speed multiplier.`);
 });
 
 zoneStore.populate();

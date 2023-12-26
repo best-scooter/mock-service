@@ -53,6 +53,7 @@ class Trip {
         this.timeEnded = now;
 
         await apiRequests.putTrip(this.id, {
+            route: this._route,
             endPosition: this.customer.position,
             timeEnded: now
         }, this.customer.token)
@@ -120,9 +121,9 @@ class Trip {
         await apiRequests.putTrip(this.id, data, this.customer.token)
     }
 
-    private async send(data: object) {
+    private send(data: object) {
         this.wsSend(data);
-        await this.apiSend(data);
+        // await this.apiSend(data);
     }
 }
 
