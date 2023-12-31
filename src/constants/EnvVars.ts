@@ -6,13 +6,18 @@
 
 
 export default {
-  NodeEnv: (process.env.NODE_ENV ?? ''),
-  Port: (process.env.PORT ?? "0"),
+  NodeEnv: (process.env.NODE_ENV ?? ""),
+  Port: parseInt(process.env.PORT ?? ""),
   JwtSecret: (process.env.JWT_SECRET ?? ""),
   ApiHost: (process.env.API_HOST ?? ""),
   AdminUsername: (process.env.ADMIN_USERNAME ?? ""),
   AdminPassword: (process.env.ADMIN_PASSWORD ?? ""),
-  PriceInitial: (process.env.PRICE_INITIAL ?? 10),
-  PriceTime: (process.env.PRICE_TIME ?? 10),
-  PriceDistance: (process.env.PRICE_DISTANCE ?? 10)
+  NrOfCustomers: parseInt(process.env.NR_OF_CUSTOMERS ?? ""),
+  NrOfSmartCustomers: parseInt(process.env.NR_OF_SMART_CUSTOMERS ?? ""),
+  NrOfPreparedCustomers: parseInt(process.env.NR_OF_PREPARED_CUSTOMERS ?? ""),
+  WsHost: (process.env.WS_HOST ?? ""),
+  ORSApiKey: (process.env.ORS_API_KEY ?? ""),
+  RefreshDelay: parseInt(process.env.REFRESH_DELAY ?? ""),
+  WalkingSpeed: parseFloat(process.env.WALKING_SPEED ?? ""),
+  SpeedMultiplier: parseFloat(process.env.SPEED_MULTIPLIER ?? "")
 } as const;

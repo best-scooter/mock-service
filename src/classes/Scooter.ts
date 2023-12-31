@@ -12,8 +12,8 @@ import Client from "./Client";
 
 class Scooter extends Client {
     scooterId: number;
-    position: Array<number>;
-    // startvärden?
+    available: boolean;
+    maxSpeed: number;
 
     constructor(connection: connection, token: string) {
         super(connection, token)
@@ -26,8 +26,8 @@ class Scooter extends Client {
 
         this.scooterId = payload.scooterId;
         this.info = "Scooter " + payload.scooterId;
-        this.position = [0, 0];
-        //     setInterval(this.updateHardware, 10000)
+        this.available = true;
+        this.maxSpeed = 20;
     }
 }
 

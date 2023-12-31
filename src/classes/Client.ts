@@ -13,11 +13,21 @@ class Client {
     connection: connection;
     token: string;
     info: string;
+    _position: [number, number]
 
     constructor(connection: connection, token: string) {
         this.token = token;
         this.connection = connection;
         this.info = "";
+        this._position = [0,0];
+    }
+
+    get position() {
+        return this._position;
+    }
+
+    set position(value: [number, number]) {
+        this._position = value;
     }
 }
 

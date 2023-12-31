@@ -70,11 +70,14 @@
         "src/*"
       ],
     },
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "resolveJsonModule": true
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.json",
     "spec/**/*.ts",
+    "types/**/*.d.ts",
     "build.ts"
   ],
   "exclude": []
