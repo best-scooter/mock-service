@@ -1,8 +1,7 @@
-import position from "./position";
+import Position from "./position";
 
 type GPSES = {
-    [scooterId: number]: position;
-    // [scooterId: number]: [x: number, y: number]
+    [scooterId: number]: Position;
 }
 
 export default GPSES

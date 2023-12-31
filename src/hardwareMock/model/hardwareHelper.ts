@@ -18,15 +18,15 @@ export default {
     },
 
     /**
-     * Simulates the battery being fully charged after a ten minute timer has passed
+     * Simulates the battery being fully charged after a two minute timer has passed
      * @param {number} scooterId 
      */
     chargeBattery: function (scooterId: number): void {
-        const tenMinutesInMilliSec = 600000
+        const twoMinutesInMilliSec = 120000
 
         setTimeout(() => {
             this.setBatteryFull(scooterId)
-        }, tenMinutesInMilliSec)
+        }, twoMinutesInMilliSec)
     },
 
     setBatteryFull: function (scooterId: number): void {
@@ -65,6 +65,15 @@ export default {
 
         hardwareBridge.writeNewPosition(scooterId, newPosition)
 
+    },
+
+    followCustomerPosition: function (scooterId: number, position: Array<number>): void {
+        const positionLatLong: Position = {
+            x: position[1],
+            y: position[0]
+        }
+
+        hardwareBridge.writeNewPosition(scooterId, positionLatLong)
     },
 
     /**

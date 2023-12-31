@@ -1,8 +1,3 @@
-// set the values inside the files. write to files.
-// (JSON object with scooter Id as key?)
-// bracket notation battery[scootId] = 0.8
-// https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Basics#bracket_notation
-
 import Batteries from "../model/types/batteries"
 import GPSES from "../model/types/gpses"
 import Position from "../model/types/position"
@@ -11,7 +6,7 @@ import Speedometers from "../model/types/speedometers"
 const fs = require('fs')
 const writeFileFlag = { encoding: "utf8", flag: "w", mode: 0o666 }
 
-let basePath = "/home/linda/dbwebb-kurser/vteam/scooter-app/model/hardware" // TODO: Change to env-var for production
+let basePath = process.env.HARDWARE_PATH
 
 let batteries: Batteries = {}
 let gpses: GPSES = {}
