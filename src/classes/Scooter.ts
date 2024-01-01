@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 
 import EnvVars from "../constants/EnvVars";
 import Client from "./Client";
+import HardwareHelper from "../hardwareMock/model/hardwareHelper";
 
 // **** Variables **** //
 
@@ -28,6 +29,12 @@ class Scooter extends Client {
         this.info = "Scooter " + payload.scooterId;
         this.available = true;
         this.maxSpeed = 20;
+    }
+
+    set hardware(value: [number, number]) {
+        super.position = value;
+
+        HardwareHelper.followCustomer(this.scooterId, value)
     }
 }
 

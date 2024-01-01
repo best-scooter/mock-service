@@ -3,6 +3,23 @@ import Position from "./types/position"
 
 export default {
     /**
+     * When the customer updates it's position, the scooter will follow.
+     * At the same time, battery and speed will be updated with new random values.
+     * @param {number} scooterId
+     * @param {array} position Expected to be [longitude, latitude] based on previous group descision
+     */
+    followCustomer: function (scooterId: number, position: Array<number>): void {
+        const positionLatLong: Position = {
+            x: position[1],
+            y: position[0]
+        }
+
+        this.updatePosition(scooterId, positionLatLong)
+        this.decreaseBattery(scooterId)
+        this.updateSpeed(scooterId)
+    },
+
+    /**
      * Update the battery level. Can decrease between a random value of 0.01 and 0.05 (1-5%).
      * @param {number} scooterId 
      */
@@ -35,10 +52,20 @@ export default {
     },
 
     /**
+     * Updates the scooters position.
+     * @param {number} scooterId
+     * @param {array} gps Expected to be [longitude, latitude] based on previous group descision
+     */
+    updatePosition: function (scooterId: number, gps: Position): void {
+        hardwareBridge.writeNewPosition(scooterId, gps)
+    },
+
+    /**
+     * Maybe not actually needed?
      * Updates latitude and longitude between +/- 0.03 degrees.
      * @param {number} scooterId 
      */
-    updatePosition: function (scooterId: number): void {
+    updatePositionRandom: function (scooterId: number): void {
         const currentPosition = hardwareBridge.getPositionFor(scooterId)
         const latitude = currentPosition.x
         const longitude = currentPosition.y
@@ -65,15 +92,6 @@ export default {
 
         hardwareBridge.writeNewPosition(scooterId, newPosition)
 
-    },
-
-    followCustomerPosition: function (scooterId: number, position: Array<number>): void {
-        const positionLatLong: Position = {
-            x: position[1],
-            y: position[0]
-        }
-
-        hardwareBridge.writeNewPosition(scooterId, positionLatLong)
     },
 
     /**

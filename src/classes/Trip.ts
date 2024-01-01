@@ -9,11 +9,11 @@ class Trip {
     id: number;
     customerId: number;
     scooterId: number;
-    bestParkingZone: number|null;
+    bestParkingZone: number | null;
     bestPickupZone: number;
-    parkedCharging: boolean|null;
+    parkedCharging: boolean | null;
     timeStarted: string;
-    timeEnded: string|null;
+    timeEnded: string | null;
     _distance: number;
     _route: [number, number][];
     priceInitial: number;
@@ -38,7 +38,7 @@ class Trip {
         this.scooter = scooter;
         this.customer = customer;
 
-        scooter.available = false;
+        scooter.available = false; // Borde inte detta även uppdateras i databasen?
 
         this.wsSend({
             timeStarted: new Date().toISOString(),
@@ -78,10 +78,10 @@ class Trip {
         return this._route;
     }
 
-    set route(value: Array<[number,number]>) {
+    set route(value: Array<[number, number]>) {
         this._route = value;
 
-        this.send({route: value});
+        this.send({ route: value });
     }
 
     get distance() {
@@ -91,20 +91,20 @@ class Trip {
     set distance(value: number) {
         this._distance = value;
 
-        this.send({distance: value});
+        this.send({ distance: value });
     }
 
     routeAppend(value: Array<[number, number]>, noBroadcast?: boolean) {
         this._route = this.route.concat(value);
 
-        this.send({routeAppend: value});
+        this.send({ routeAppend: value });
     }
 
     async update(routeAppend: Array<[number, number]>, distance: number) {
         this._route = this.route.concat(routeAppend);
         this._distance = distance;
 
-        await this.send({routeAppend, distance});
+        await this.send({ routeAppend, distance });
     }
 
     private wsSend(data: object) {
