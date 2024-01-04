@@ -22,7 +22,7 @@ export default {
      * @param {ClientStore} clientStore
      * @returns {Promise<Array<Boolean>>}
      */
-    populate: async function(clientStore: ClientStore) {
+    populate: async function (clientStore: ClientStore) {
         const promises: Array<Promise<any>> = [];
 
         for (let i = 0; i < EnvVars.NrOfCustomers; i++) {
@@ -30,7 +30,7 @@ export default {
             const promise = new Promise(async (resolve, reject) => {
                 const result = await apiRequests.postCustomerToken(
                     "customer" + customerId + "@test.com"
-                    );
+                );
                 const token = result.data.token;
                 const wsClient = new WebSocket.client();
 
@@ -42,13 +42,13 @@ export default {
                     const customer = new Customer(connection, token)
                     clientStore.addCustomer(customer);
 
-                    connection.on('error', function(error) {
+                    connection.on('error', function (error) {
                         logger.warn("Connection Error: " + error.toString());
                     });
                     resolve(true)
                 })
 
-                wsClient.on('connectFailed', function(error) {
+                wsClient.on('connectFailed', function (error) {
                     logger.warn('Connect Error: ' + error.toString());
                 });
             })
@@ -64,7 +64,7 @@ export default {
      * @param {number} zoneId Zone id of the city zone
      * @returns {Feature}
      */
-    _getCityFeature: async function(zoneId: number) {
+    _getCityFeature: async function (zoneId: number) {
         const cityZone = await apiRequests.getZone(zoneId);
         const cityPolygon = [cityZone.area.concat(cityZone.area[0])];
         return turf.polygon(cityPolygon);
@@ -75,7 +75,7 @@ export default {
      * including setting start position in a random location
      * @param {ClientStore} clientStore Client store with the customers to initiate
      */
-    initiate: async function(clientStore: ClientStore) {
+    initiate: async function (clientStore: ClientStore) {
         const customers = clientStore.customers;
         const points: Array<[number, number]> = [];
 
@@ -97,7 +97,7 @@ export default {
         // Initiate each customer
         for (const customer of customers) {
             // Get random point and use as start position for the customer
-            const randomIndex = Math.floor(Math.random()*points.length)
+            const randomIndex = Math.floor(Math.random() * points.length)
             const startPosition = points[randomIndex];
             customer.position = startPosition;
 
@@ -107,8 +107,8 @@ export default {
                 {
                     positionY: startPosition[0],
                     positionX: startPosition[1]
-                    
-                }, 
+
+                },
                 customer.token
             );
 
@@ -134,8 +134,11 @@ export default {
         }
     },
 
-    async createFakeScooters() {
-        for (let i = 1; i < 10; i++) {
+    async createFakeScooters(amount: number) {
+        const thisCity = zoneStore.getCityZone([57.696920, 11.950950])
+        const positions = helpers.getRandomPositions(thisCity, amount + 1)
+
+        for (let i = 1; i <= amount; i++) {
             const result = await apiRequests.postScooterToken(i, i.toString());
             const token = result.data.token;
             const scooterWs = new WebSocket.client();
@@ -146,18 +149,19 @@ export default {
 
             scooterWs.on('connect', (connection) => {
                 const scooter = new Scooter(connection, token)
-
-                scooter.position = [57.696920, 11.950950]
+                scooter.position = positions[i]
                 clientStore.addScooter(scooter);
 
-                connection.on('error', function(error) {
+                connection.on('error', function (error) {
                     logger.warn("Connection Error: " + error.toString());
                 });
             })
 
-            scooterWs.on('connectFailed', function(error) {
+            scooterWs.on('connectFailed', function (error) {
                 logger.warn('Connect Error: ' + error.toString());
             });
         }
+
+        // TODO: eller hardwareBuilder här?
     }
 }

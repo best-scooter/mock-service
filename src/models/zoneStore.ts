@@ -12,7 +12,7 @@ const zoneStore = {
     },
 
     getZone(zoneId: number): Zone {
-        let foundZone: Zone|null = null;
+        let foundZone: Zone | null = null;
 
         for (const zone of this.zones) {
             if (zone.id === zoneId) {
@@ -64,7 +64,9 @@ const zoneStore = {
         }
 
         throw new NoZoneFoundError();
-    }
+    },
+
+    // getIsInParkingZone...
 }
 
 export default zoneStore;

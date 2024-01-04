@@ -89,9 +89,9 @@ class SmartCustomerStrategy extends CustomerStrategy {
         return true;
     }
 
-    private getNearbyScooter(): Scooter|null {
+    private getNearbyScooter(): Scooter | null {
         let closestDistance = Infinity;
-        let nearestScooter: Scooter|null = null;
+        let nearestScooter: Scooter | null = null;
 
         for (const scooter of clientStore._scooters) {
             if (!scooter.available) { continue; }
@@ -115,21 +115,6 @@ class SmartCustomerStrategy extends CustomerStrategy {
             this.customer.token
         );
         const trip = new Trip(this.customer, scooter, result.data);
-
-        // nodeCleanup((exitCode: number, signal: string) => {
-        //     if (signal) {
-        //         trip.end().then(function () {
-        //             // calling process.exit() won't inform parent process of signal
-        //             process.kill(process.pid, signal);
-        //         });
-        //         nodeCleanup.uninstall(); // don't call cleanup handler again
-        //         return false;
-        //     }
-        // });
-
-        // process.on('SIGINT', () => {
-        //     trip.end();
-        // });
 
         return trip;
     }
@@ -171,14 +156,14 @@ class SmartCustomerStrategy extends CustomerStrategy {
     private async getRandomParkingZone() {
         const zones = zoneStore.zones;
         const parkingZones = []
-        
+
         for (const zone of zones) {
             if (zone.type.toLowerCase() === "parking") {
                 parkingZones.push(zone);
             }
         }
 
-        const randomIndex = Math.floor(Math.random()*parkingZones.length)
+        const randomIndex = Math.floor(Math.random() * parkingZones.length)
         const parkingZone = parkingZones[randomIndex];
 
         return parkingZone;

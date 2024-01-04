@@ -1,5 +1,7 @@
 import hardwareBridge from "../controller/hardwareBridge"
 import Position from "./types/position"
+import ApiRequests from "../../models/apiRequests"
+import ScooterType from "../../types/ScooterType"
 
 export default {
     /**
@@ -8,30 +10,44 @@ export default {
      * @param {number} scooterId
      * @param {array} position Expected to be [longitude, latitude] based on previous group descision
      */
-    followCustomer: function (scooterId: number, position: Array<number>): void {
+    updatePosSpeedBatt: async function (scooterId: number, position: Array<number>, token: string): Promise<ScooterType> {
         const positionLatLong: Position = {
             x: position[1],
             y: position[0]
         }
 
         this.updatePosition(scooterId, positionLatLong)
-        this.decreaseBattery(scooterId)
-        this.updateSpeed(scooterId)
+        const newSpeed = this.updateSpeed(scooterId)
+        const battery = this.decreaseBattery(scooterId)
+
+        let data: ScooterType = {
+            positionX: positionLatLong.x,
+            positionY: positionLatLong.y,
+            battery: battery
+        }
+
+        await ApiRequests.putScooter(scooterId, data, token)
+
+        data.speed = newSpeed
+
+        return data
     },
 
     /**
-     * Update the battery level. Can decrease between a random value of 0.01 and 0.05 (1-5%).
+     * Update the battery level. Can decrease between a random value of 0.01 and 0.02 (1-2%).
      * @param {number} scooterId 
      */
-    decreaseBattery: function (scooterId: number): void {
+    decreaseBattery: function (scooterId: number): number {
         const currentBattery = hardwareBridge.getBatteryFor(scooterId)
 
         const min = 0.01
-        const max = 0.05
+        const max = 0.02
         const batteryChange = this.getRandomNumber(min, max)
 
         const newBattery = currentBattery - batteryChange
         hardwareBridge.writeNewBattery(scooterId, newBattery)
+
+        return newBattery
     },
 
     /**
@@ -98,10 +114,12 @@ export default {
      * Update to a new speed between 0-20 km/h.
      * @param {number} scooterId 
      */
-    updateSpeed: function (scooterId: number): void {
+    updateSpeed: function (scooterId: number): number {
         const max = 20
         const newSpeed = Math.floor(this.getRandomNumber(max))
         hardwareBridge.writeNewSpeed(scooterId, newSpeed)
+
+        return newSpeed
     },
 
     /**

@@ -2,6 +2,7 @@ import logger from 'jet-logger';
 
 import EnvVars from "../constants/EnvVars";
 import { adminToken } from "../server";
+import ScooterType from '../types/ScooterType';
 
 import type Trip from '../types/TripType';
 
@@ -26,7 +27,7 @@ function _httpPut(url: string, data: any, token: string) {
             },
             body: JSON.stringify(data)
         });
-    } catch(error) {
+    } catch (error) {
         logger.err(error);
         return new Response();
     }
@@ -49,7 +50,7 @@ function _httpPost(url: string, data: any, token: string) {
             },
             body: JSON.stringify(data)
         });
-    } catch(error) {
+    } catch (error) {
         logger.err(error);
         return new Response();
     }
@@ -70,7 +71,7 @@ function _httpGet(url: string, token: string) {
                 "X-Access-Token": token
             }
         });
-    } catch(error) {
+    } catch (error) {
         logger.err(error);
         return new Response();
     }
@@ -91,6 +92,18 @@ async function putScooter(scooterId: number, data: any, token: string) {
         data,
         token
     );
+}
+
+/**
+ * Get request for a single scooter
+ * @param {number} scooterId 
+ * @param {string} token 
+ * @returns {Object} Object with scooter data
+ */
+async function getScooter(scooterId: number, token: string): Promise<ScooterType> {
+    const response = await _httpGet(EnvVars.ApiHost + "v1/scooter" + scooterId, token)
+    const result = await response.json()
+    return await result.data
 }
 
 /**
@@ -139,7 +152,7 @@ async function getZones() {
 async function postCustomerToken(customerEmail: string) {
     const response = await _httpPost(
         EnvVars.ApiHost + "v1/customer/token",
-        {email: customerEmail},
+        { email: customerEmail },
         ""
     );
 
@@ -155,7 +168,7 @@ async function postCustomerToken(customerEmail: string) {
 async function postScooterToken(scooterId: number, password: string) {
     const response = await _httpPost(
         EnvVars.ApiHost + "v1/scooter/token",
-        {scooterId, password},
+        { scooterId, password },
         ""
     );
 
@@ -169,10 +182,10 @@ async function postScooterToken(scooterId: number, password: string) {
  * @param {Array<number>} startPosition Start position of the trip expressed as [lon, lat]or [y, x]  coordinates
  * @returns {Promise<any>}
  */
-async function postTrip(customerId: number, scooterId: number, startPosition: Array<number>, token: string): Promise<{"data": Trip}> {
+async function postTrip(customerId: number, scooterId: number, startPosition: Array<number>, token: string): Promise<{ "data": Trip }> {
     const response = await _httpPost(
         EnvVars.ApiHost + "v1/trip/0",
-        {customerId, scooterId, startPosition},
+        { customerId, scooterId, startPosition },
         token
     );
 
@@ -200,6 +213,7 @@ async function putTrip(tripId: number, data: any, token: string): Promise<Respon
 
 export default {
     putScooter,
+    getScooter,
     putCustomer,
     getZone,
     getZones,

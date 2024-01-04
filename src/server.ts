@@ -15,7 +15,7 @@ import zoneStore from './models/zoneStore';
 
 // // **** Setup **** //
 
-const httpServer = http.createServer(function(request, response) {
+const httpServer = http.createServer(function (request, response) {
     logger.info((new Date()) + ' Received request for ' + request.url);
     response.writeHead(404);
     response.end();
@@ -40,9 +40,10 @@ const adminToken = fetch(EnvVars.ApiHost + "v1/admin/token", {
     return result.data.token;
 });
 
+// TODO: köra hardwareBuilder här???
 customerSystem.populate(clientStore).then(async () => {
     logger.info(`Successfully connected ${clientStore.customers.length} customers and a ${EnvVars.RefreshDelay}ms refresh frequency.`);
-    await customerSystem.createFakeScooters();
+    await customerSystem.createFakeScooters(10);
     await customerSystem.initiate(clientStore);
     const simpleAmount = EnvVars.NrOfCustomers - EnvVars.NrOfSmartCustomers - EnvVars.NrOfPreparedCustomers
     logger.info(`Started ${EnvVars.NrOfSmartCustomers} smart, ${EnvVars.NrOfPreparedCustomers} prepared and ${simpleAmount} simple customers with a x${EnvVars.SpeedMultiplier} speed multiplier.`);

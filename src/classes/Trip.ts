@@ -38,13 +38,15 @@ class Trip {
         this.scooter = scooter;
         this.customer = customer;
 
-        scooter.available = false; // Borde inte detta även uppdateras i databasen?
+        scooter.available = false;
 
         this.wsSend({
             timeStarted: new Date().toISOString(),
             route: [this.customer.position],
             distance: 0
         });
+
+        scooter.charging = false;
     }
 
     async end() {
@@ -55,7 +57,8 @@ class Trip {
         await apiRequests.putTrip(this.id, {
             route: this._route,
             endPosition: this.customer.position,
-            timeEnded: now
+            timeEnded: now,
+            // parkedCharging: bool
         }, this.customer.token)
 
         this.customer.connection.send(JSON.stringify({
@@ -64,6 +67,9 @@ class Trip {
             customerId: this.customerId,
             scooterId: this.scooterId
         }));
+
+        // if parked in charging zone
+        // this.scooter.charging = true
     }
 
     get tripId() {
