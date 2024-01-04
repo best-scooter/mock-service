@@ -54,7 +54,7 @@ class Scooter extends Client {
     }
 
     set position(positionYX: [number, number]) {
-        this.position = positionYX;
+        this._position = positionYX;
 
         const hardwareData = HardwareHelper.updatePosSpeedBatt(this.scooterId, positionYX, this.token)
             .then(response => {
