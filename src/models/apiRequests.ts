@@ -57,7 +57,7 @@ function _httpPost(url: string, data: any, token: string) {
 }
 
 /**
- * A gett http request
+ * A get http request
  * @param {string} url Endpoint URL
  * @param {string} token JWT token to use
  * @returns {Response}
@@ -66,6 +66,27 @@ function _httpGet(url: string, token: string) {
     try {
         return fetch(url, {
             method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Access-Token": token
+            }
+        });
+    } catch (error) {
+        logger.err(error);
+        return new Response();
+    }
+}
+
+/**
+ * A delete http request
+ * @param {string} url Endpoint URL
+ * @param {string} token JWT token to use
+ * @returns {Response}
+ */
+function _httpDelete(url: string, token: string) {
+    try {
+        return fetch(url, {
+            method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 "X-Access-Token": token
@@ -209,6 +230,38 @@ async function putTrip(tripId: number, data: any, token: string): Promise<Respon
     return response;
 }
 
+/**
+ * Parking post by scooter ID, should add a parking for every zone
+ * the scooter is in (according to the database, so update position first)
+ * @param {number} scooterId Scooter ID to add
+ * @param {string} token JWT to use for the request
+ * @returns {Promise<any>}
+ */
+async function postParking(scooterId: number, scooterPosition: [number, number], token: string): Promise<Response> {
+    const response = await _httpPost(
+        EnvVars.ApiHost + "v1/parking/by/scooter/" + scooterId,
+        {scooterPosition},
+        token
+    );
+
+    return response;
+}
+
+/**
+ * Parking delete
+ * @param {number} scooterId Scooter ID to add
+ * @param {string} token JWT to use for the request
+ * @returns {Promise<any>}
+ */
+async function delParking(scooterId: number, token: string): Promise<Response> {
+    const response = await _httpDelete(
+        EnvVars.ApiHost + "v1/parking/by/scooter/" + scooterId,
+        token
+    );
+
+    return response;
+}
+
 // **** Exports **** //
 
 export default {
@@ -220,5 +273,7 @@ export default {
     postCustomerToken,
     postScooterToken,
     postTrip,
-    putTrip
+    putTrip,
+    postParking,
+    delParking
 }

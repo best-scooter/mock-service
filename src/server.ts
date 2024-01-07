@@ -42,14 +42,19 @@ const adminToken = fetch(EnvVars.ApiHost + "v1/admin/token", {
 
 // TODO: köra hardwareBuilder här???
 customerSystem.populate(clientStore).then(async () => {
-    logger.info(`Successfully connected ${clientStore.customers.length} customers and a ${EnvVars.RefreshDelay}ms refresh frequency.`);
-    await customerSystem.createFakeScooters(10);
+    await zoneStore.populate()
+}).then(async () => {
     await customerSystem.initiate(clientStore);
-    const simpleAmount = EnvVars.NrOfCustomers - EnvVars.NrOfSmartCustomers - EnvVars.NrOfPreparedCustomers
-    logger.info(`Started ${EnvVars.NrOfSmartCustomers} smart, ${EnvVars.NrOfPreparedCustomers} prepared and ${simpleAmount} simple customers with a x${EnvVars.SpeedMultiplier} speed multiplier.`);
+
+    const simpleAmount = EnvVars.NrOfCustomers - EnvVars.NrOfSmartCustomers - EnvVars.NrOfPreparedCustomers;
+    logger.info(`Successfully connected ${clientStore.customers.length} customers and a ${EnvVars.RefreshDelay}ms refresh frequency.`);
+    logger.info(`Started ${EnvVars.NrOfSmartCustomers} smart, ${EnvVars.NrOfPreparedCustomers} prepared and ${simpleAmount} simple customers with a x${EnvVars.SpeedMultiplier} speed multiplier.`)
+
+    await customerSystem.createFakeScooters(EnvVars.NrOfScooters, [57.696920, 11.950950]);
+    logger.info(`Successfully connected ${EnvVars.NrOfScooters} scooters.`);
 });
 
-zoneStore.populate();
+// zoneStore.populate()
 
 wsServer.on('request', requestHandler);
 

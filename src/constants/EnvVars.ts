@@ -12,6 +12,7 @@ export default {
   ApiHost: (process.env.API_HOST ?? ""),
   AdminUsername: (process.env.ADMIN_USERNAME ?? ""),
   AdminPassword: (process.env.ADMIN_PASSWORD ?? ""),
+  NrOfScooters: parseInt(process.env.NR_OF_SCOOTERS ?? ""),
   NrOfCustomers: parseInt(process.env.NR_OF_CUSTOMERS ?? ""),
   NrOfSmartCustomers: parseInt(process.env.NR_OF_SMART_CUSTOMERS ?? ""),
   NrOfPreparedCustomers: parseInt(process.env.NR_OF_PREPARED_CUSTOMERS ?? ""),

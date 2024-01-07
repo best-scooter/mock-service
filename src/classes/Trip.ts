@@ -48,6 +48,7 @@ class Trip {
         });
 
         scooter.charging = false;
+        apiRequests.delParking(scooter.scooterId, scooter.token);
     }
 
     async end() {
@@ -74,6 +75,8 @@ class Trip {
             customerId: this.customerId,
             scooterId: this.scooterId
         }));
+
+        apiRequests.postParking(this.scooter.scooterId, this.scooter.position, this.scooter.token);
     }
 
     get tripId() {

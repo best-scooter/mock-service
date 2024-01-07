@@ -15,12 +15,12 @@ import ScooterType from '../types/ScooterType';
 
 class Scooter extends Client {
     scooterId: number;
-    available!: boolean;
-    maxSpeed!: number;
-    battery!: number;
-    charging!: boolean;
-    decomissioned!: boolean;
-    beingServiced!: boolean;
+    available: boolean = true;
+    maxSpeed: number = 30 * EnvVars.SpeedMultiplier;
+    battery: number = 0.5;
+    charging: boolean = false;
+    decomissioned: boolean = false;
+    beingServiced: boolean = false;
     disabled: boolean = false; // TODO: Fortsätt
 
     constructor(connection: connection, token: string) {
@@ -35,6 +35,7 @@ class Scooter extends Client {
         this.scooterId = payload.scooterId;
         this.info = "Scooter " + payload.scooterId;
 
+        // Kommentera bort för att lyckas starta
         const scooterData = apiRequests.getScooter(this.scooterId, this.token)
             .then(response => {
                 this.available = (response.available as boolean)
@@ -56,10 +57,15 @@ class Scooter extends Client {
     set position(positionYX: [number, number]) {
         this._position = positionYX;
 
+        // Kommentera bort för att lyckas starta
         const hardwareData = HardwareHelper.updatePosSpeedBatt(this.scooterId, positionYX, this.token)
             .then(response => {
                 this.battery = (response.battery as number)
             })
+    }
+    
+    get position() {
+        return this._position;
     }
 
     // TODO: lägga till för statusar: klass, databas, ws. Glöm inte lägga till laddningsfunktion för laddning! kom ihåg sätta available = false
