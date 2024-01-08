@@ -161,7 +161,5 @@ export default {
                 logger.warn('Connect Error: ' + error.toString());
             });
         }
-
-        // TODO: eller hardwareBuilder här?
     }
 }

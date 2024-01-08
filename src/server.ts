@@ -40,7 +40,6 @@ const adminToken = fetch(EnvVars.ApiHost + "v1/admin/token", {
     return result.data.token;
 });
 
-// TODO: köra hardwareBuilder här???
 customerSystem.populate(clientStore).then(async () => {
     logger.info(`Successfully connected ${clientStore.customers.length} customers and a ${EnvVars.RefreshDelay}ms refresh frequency.`);
     await customerSystem.createFakeScooters(10);

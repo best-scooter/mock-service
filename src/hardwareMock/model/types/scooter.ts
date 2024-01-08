@@ -1,6 +1,6 @@
 import Position from "./position";
 
-type Scooter = {
+type ScooterHardware = {
     id: number;
     battery: number;
     redLight: string;
@@ -8,4 +8,4 @@ type Scooter = {
     position: Position;
 }
 
-export default Scooter; 
+export default ScooterHardware; 

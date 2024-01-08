@@ -2,6 +2,7 @@ import hardwareBridge from "../controller/hardwareBridge"
 import Position from "./types/position"
 import ApiRequests from "../../models/apiRequests"
 import ScooterType from "../../types/ScooterType"
+import Scooter from "../../classes/Scooter"
 
 export default {
     /**
@@ -54,17 +55,22 @@ export default {
      * Simulates the battery being fully charged after a two minute timer has passed
      * @param {number} scooterId 
      */
-    chargeBattery: function (scooterId: number): void {
+    chargeBattery: function (scooter: Scooter, data: object, light: string): void {
         const twoMinutesInMilliSec = 120000
+        this.updateLight(scooter.scooterId, light)
+
+        ApiRequests.putScooter(scooter.scooterId, data, scooter.token)
 
         setTimeout(() => {
-            this.setBatteryFull(scooterId)
+            this.setBatteryFull(scooter)
         }, twoMinutesInMilliSec)
     },
 
-    setBatteryFull: function (scooterId: number): void {
+    setBatteryFull: function (scooter: Scooter): void {
         const battery = 1
-        hardwareBridge.writeNewBattery(scooterId, battery)
+        hardwareBridge.writeNewBattery(scooter.scooterId, battery)
+
+        scooter.charging = false
     },
 
     /**
@@ -139,6 +145,10 @@ export default {
     readLight: function (scooterId: number): string {
         const currentLight = hardwareBridge.getLightFor(scooterId)
         return currentLight
+    },
+
+    updateLight: function (scooterId: number, onOff: string): void {
+        hardwareBridge.writeNewLight(scooterId, onOff)
     },
 
     /**
