@@ -41,7 +41,7 @@ class Scooter extends Client {
         this.scooterId = payload.scooterId;
         this.info = "Scooter " + payload.scooterId;
 
-        const scooterData = apiRequests.getScooter(this.scooterId, this.token)
+        const scooterData = ApiRequests.getScooter(this.scooterId, this.token)
             .then(response => {
                 this._available = (response.available as boolean)
                 this.maxSpeed = (response.maxSpeed as number)
