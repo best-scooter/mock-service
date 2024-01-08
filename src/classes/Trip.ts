@@ -2,6 +2,7 @@ import TripType from "../types/TripType";
 import Scooter from "./Scooter";
 import Customer from "./Customer";
 import apiRequests from "../models/apiRequests";
+import zoneStore from "@src/models/zoneStore";
 
 class Trip {
     scooter: Scooter;
@@ -47,10 +48,17 @@ class Trip {
         });
 
         scooter.charging = false;
+        apiRequests.delParking(scooter.scooterId, scooter.token);
     }
 
     async end() {
         const now = new Date().toISOString();
+        let parkedCharging = false;
+
+        if (zoneStore.isInParkingZone(this.scooter.position)) {
+            parkedCharging = true;
+            this.scooter.charging = true;
+        }
 
         this.timeEnded = now;
 
@@ -58,8 +66,8 @@ class Trip {
             route: this._route,
             endPosition: this.customer.position,
             timeEnded: now,
-            // parkedCharging: bool
-        }, this.customer.token)
+            parkedCharging
+        }, this.customer.token);
 
         this.customer.connection.send(JSON.stringify({
             message: "tripEnd",
@@ -68,8 +76,7 @@ class Trip {
             scooterId: this.scooterId
         }));
 
-        // if parked in charging zone
-        // this.scooter.charging = true
+        apiRequests.postParking(this.scooter.scooterId, this.scooter.position, this.scooter.token);
     }
 
     get tripId() {

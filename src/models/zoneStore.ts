@@ -35,7 +35,7 @@ const zoneStore = {
         }
     },
 
-    getZoneMaxSpeed(position: Array<number>) {
+    getZoneMaxSpeed(position: [number, number]) {
         let maxSpeed = Infinity;
         const pt = turf.point(position);
 
@@ -49,7 +49,7 @@ const zoneStore = {
         return maxSpeed;
     },
 
-    getCityZone(position: Array<number>) {
+    getCityZone(position: [number, number]) {
         const pt = turf.point(position);
 
         for (const zone of this.zones) {
@@ -66,7 +66,24 @@ const zoneStore = {
         throw new NoZoneFoundError();
     },
 
-    // getIsInParkingZone...
+    isInParkingZone(position: [number, number]) {
+        const pt = turf.point(position);
+        let charging = false;
+
+        for (const zone of this._zones) {
+            const poly = turf.polygon([[...zone.area, zone.area[0]]])
+
+            if (
+                zone.type.toLowerCase() === "parking" &&
+                turf.inside(pt, poly)
+            ) {
+                charging = true;
+                // TODO: post parking?
+            }
+        }
+
+        return charging;
+    }
 }
 
 export default zoneStore;

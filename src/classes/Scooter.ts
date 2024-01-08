@@ -20,7 +20,7 @@ import hardwareHelper from "../hardwareMock/model/hardwareHelper";
 class Scooter extends Client {
     scooterId: number;
     _available: boolean = true;
-    maxSpeed: number = 20;
+    maxSpeed: number = 30 * EnvVars.SpeedMultiplier;;
     battery: number = 1;
     _charging: boolean = false;
     _decomissioned: boolean = false;
@@ -41,7 +41,7 @@ class Scooter extends Client {
         this.scooterId = payload.scooterId;
         this.info = "Scooter " + payload.scooterId;
 
-        const scooterData = ApiRequests.getScooter(this.scooterId, this.token)
+        const scooterData = apiRequests.getScooter(this.scooterId, this.token)
             .then(response => {
                 this._available = (response.available as boolean)
                 this.maxSpeed = (response.maxSpeed as number)
@@ -71,13 +71,18 @@ class Scooter extends Client {
     }
 
     set position(positionYX: [number, number]) {
-        this.position = positionYX;
+        this._position = positionYX;
 
+        // Kommentera bort för att lyckas starta
         const hardwareData = HardwareHelper.updatePosSpeedBatt(this.scooterId, positionYX, this.token)
             .then(response => {
                 this.battery = (response.battery as number)
                 this.currentSpeed = (response.speed as number)
             })
+    }
+
+    get position() {
+        return this._position;
     }
 
     set available(value: boolean) {

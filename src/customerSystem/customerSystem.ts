@@ -134,8 +134,8 @@ export default {
         }
     },
 
-    async createFakeScooters(amount: number) {
-        const thisCity = zoneStore.getCityZone([57.696920, 11.950950])
+    async createFakeScooters(amount: number, position: [number, number]) {
+        const thisCity = zoneStore.getCityZone(position)
         const positions = helpers.getRandomPositions(thisCity, amount + 1)
 
         for (let i = 1; i <= amount; i++) {
@@ -151,6 +151,13 @@ export default {
                 const scooter = new Scooter(connection, token)
                 scooter.position = positions[i]
                 clientStore.addScooter(scooter);
+
+                apiRequests.delParking(scooter.scooterId, scooter.token).then(() => {
+                    apiRequests.postParking(scooter.scooterId, scooter.position, scooter.token);
+                }).catch((error) => {
+                    logger.err(error);
+                    apiRequests.postParking(scooter.scooterId, scooter.position, scooter.token);
+                })
 
                 connection.on('error', function (error) {
                     logger.warn("Connection Error: " + error.toString());
