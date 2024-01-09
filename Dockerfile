@@ -21,4 +21,10 @@ EXPOSE 8082
 
 RUN npm install
 
+# RUN npm install \
+    # npm install @turf/turf \
+    # npm install random-points-on-polygon \
+    # npm install openrouteservice-js \
+    # npm install geolib
+
 ENTRYPOINT [ "node", "/server/dist/index.js" ]
