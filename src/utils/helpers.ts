@@ -62,9 +62,9 @@ export default {
         return point.geometry.coordinates as [number, number];
     },
 
-    getRandomPositions(zone: Zone, amount?: number) {
+    getRandomPositions(zone: Zone, amount: number) {
         const poly = turf.polygon([[...zone.area, zone.area[0]]]);
-        const points = randomPointsOnPolygon(amount ?? 1, poly);
+        const points = randomPointsOnPolygon(amount, poly);
         const holder = [];
 
         for (const point of Object.values(points)) {

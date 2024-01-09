@@ -97,6 +97,7 @@ class SmartCustomerStrategy extends CustomerStrategy {
             if (!scooter.available) { continue; }
 
             const distance = helpers.getDistance(this.customer.position, scooter.position);
+            console.log(distance)
 
             if (distance < closestDistance) {
                 closestDistance = distance;

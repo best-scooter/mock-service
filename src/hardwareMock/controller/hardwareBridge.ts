@@ -3,8 +3,10 @@ import GPSES from "../model/types/gpses"
 import Position from "../model/types/position"
 import RedLights from "../model/types/redLights"
 import Speedometers from "../model/types/speedometers"
-const fs = require('fs')
-const writeFileFlag = { encoding: "utf8", flag: "w", mode: 0o666 }
+import fs from 'fs'
+// const fs = require('fs')
+// const writeFileFlag = { encoding: "utf8", flag: "w", mode: 0o666 }
+const writeFileFlag = { flag: "w", mode: 0o666 }
 
 let basePath = process.env.HARDWARE_PATH
 
@@ -31,7 +33,7 @@ export default {
      */
     writeNewBattery: function (scooterId: number, newBattery: number): void {
         batteries[scooterId] = newBattery
-        fs.writeFileSync(basePath + "battery", batteries, writeFileFlag)
+        fs.writeFileSync(basePath + "battery", JSON.stringify(batteries), writeFileFlag)
     },
 
     /**
@@ -51,7 +53,7 @@ export default {
      */
     writeNewPosition: function (scooterId: number, newPosition: Position): void {
         gpses[scooterId] = newPosition
-        fs.writeFileSync(basePath + "gps", gpses, writeFileFlag)
+        fs.writeFileSync(basePath + "gps", JSON.stringify(gpses), writeFileFlag)
     },
 
     /**
@@ -61,7 +63,7 @@ export default {
      */
     writeNewSpeed: function (scooterId: number, newSpeed: number): void {
         speedometers[scooterId] = newSpeed
-        fs.writeFileSync(basePath + "speedometer", speedometers, writeFileFlag)
+        fs.writeFileSync(basePath + "speedometer", JSON.stringify(speedometers), writeFileFlag)
     },
 
     /**
@@ -81,6 +83,6 @@ export default {
      */
     writeNewLight: function (scooterId: number, newLight: string): void {
         redlights[scooterId] = newLight
-        fs.writeFileSync(basePath + "redLight", redlights, writeFileFlag)
+        fs.writeFileSync(basePath + "redLight", JSON.stringify(redlights), writeFileFlag)
     }
 }
