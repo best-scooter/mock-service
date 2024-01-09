@@ -8,7 +8,7 @@ import ApiRequests from "../models/apiRequests";
 import HardwareBuilder from "../hardwareMock/controller/hardwareBuilder";
 import ScooterHardware from "../hardwareMock/model/types/scooter";
 import Position from "../hardwareMock/model/types/position";
-import ScooterType from "@src/types/ScooterType";
+import ScooterType from "../types/ScooterType";
 import hardwareHelper from "../hardwareMock/model/hardwareHelper";
 
 // **** Variables **** //
@@ -43,7 +43,7 @@ class Scooter extends Client {
 
         const scooterData = ApiRequests.getScooter(this.scooterId, this.token)
             .then(response => {
-                this._available = (response.available as boolean)
+                this.available = true
                 this.maxSpeed = (response.maxSpeed as number)
                 this.battery = (response.battery as number)
                 this._charging = (response.charging as boolean)
@@ -100,6 +100,10 @@ class Scooter extends Client {
         }))
     }
 
+    get available() {
+        return this._available
+    }
+
     set charging(value: boolean) {
         if (value == true) {
             this._charging = value
@@ -134,6 +138,10 @@ class Scooter extends Client {
         }))
     }
 
+    get charging() {
+        return this._charging;
+    }
+
     set decomissioned(value: boolean) {
         if (value == true) {
             this._decomissioned = value
@@ -155,6 +163,10 @@ class Scooter extends Client {
             decomissioned: value,
             available: this._available
         }))
+    }
+
+    get decomissioned() {
+        return this._decomissioned;
     }
 
     set beingServiced(value: boolean) {
@@ -180,6 +192,10 @@ class Scooter extends Client {
         }))
     }
 
+    get beingServiced() {
+        return this._beingServiced
+    }
+
     set disabled(value: boolean) {
         if (value == true) {
             this._disabled = value
@@ -199,6 +215,10 @@ class Scooter extends Client {
             scooterId: this.scooterId,
             disabled: value
         }))
+    }
+
+    get disabled() {
+        return this._disabled;
     }
 }
 

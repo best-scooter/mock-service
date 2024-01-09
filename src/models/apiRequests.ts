@@ -122,7 +122,7 @@ async function putScooter(scooterId: number, data: any, token: string) {
  * @returns {Object} Object with scooter data
  */
 async function getScooter(scooterId: number, token: string): Promise<ScooterType> {
-    const response = await _httpGet(EnvVars.ApiHost + "v1/scooter" + scooterId, token)
+    const response = await _httpGet(EnvVars.ApiHost + "v1/scooter/" + scooterId, token)
     const result = await response.json()
     return await result.data
 }

@@ -4,7 +4,6 @@
 
 /* eslint-disable node/no-process-env */
 
-
 export default {
   NodeEnv: (process.env.NODE_ENV ?? ""),
   Port: parseInt(process.env.PORT ?? ""),

@@ -19,7 +19,7 @@ class SimpleCustomerStrategy extends CustomerStrategy {
     protected async main() {
         while (true) {
             const currentCity = zoneStore.getCityZone(this.customer.position);
-            const positions = helpers.getRandomPositions(currentCity)
+            const positions = helpers.getRandomPositions(currentCity, 1)
             const targetPosition = positions[0];
             const route = [this.customer.position, targetPosition];
 

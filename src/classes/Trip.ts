@@ -2,7 +2,7 @@ import TripType from "../types/TripType";
 import Scooter from "./Scooter";
 import Customer from "./Customer";
 import apiRequests from "../models/apiRequests";
-import zoneStore from "@src/models/zoneStore";
+import zoneStore from "../models/zoneStore";
 
 class Trip {
     scooter: Scooter;

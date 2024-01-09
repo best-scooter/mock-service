@@ -52,12 +52,12 @@ abstract class CustomerStrategy {
             let totalDistance = 0;
             let id = this.customer.customerId;
 
-            // logger.info(`Customer ${id} starts a new journey with total length: ${Math.round(lineLength)}m.`)
+            logger.info(`Customer ${id} starts a new journey with total length: ${Math.round(lineLength)}m.`)
 
             while (totalDistance < lineLength) {
                 totalDistance += distancePerRefresh;
                 // console.log(distancePerRefresh);
-                // console.log(totalDistance);
+                console.log(totalDistance);
                 const pointFeature = turf.along(
                     line,
                     totalDistance / 1000
