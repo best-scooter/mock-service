@@ -47,7 +47,7 @@ class Trip {
             distance: 0
         });
 
-        scooter.charging = false;
+        // scooter.charging = false;
         apiRequests.delParking(scooter.scooterId, scooter.token);
     }
 
