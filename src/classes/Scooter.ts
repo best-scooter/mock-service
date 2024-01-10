@@ -134,7 +134,7 @@ class Scooter extends Client {
             message: "scooter",
             scooterId: this.scooterId,
             charging: value,
-            available: this._available
+            // available: this._available
         }))
     }
 
