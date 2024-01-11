@@ -10,6 +10,7 @@ import ScooterHardware from "../hardwareMock/model/types/scooter";
 import Position from "../hardwareMock/model/types/position";
 import ScooterType from "../types/ScooterType";
 import hardwareHelper from "../hardwareMock/model/hardwareHelper";
+import ScooterStrategy from "./ScooterStrategy";
 
 // **** Variables **** //
 
@@ -19,6 +20,7 @@ import hardwareHelper from "../hardwareMock/model/hardwareHelper";
 
 class Scooter extends Client {
     scooterId: number;
+    strategy: ScooterStrategy|null;
     _available: boolean = true;
     maxSpeed: number = 30 * EnvVars.SpeedMultiplier;;
     battery: number = 1;
@@ -40,6 +42,7 @@ class Scooter extends Client {
 
         this.scooterId = payload.scooterId;
         this.info = "Scooter " + payload.scooterId;
+        this.strategy = null;
 
         const scooterData = ApiRequests.getScooter(this.scooterId, this.token)
             .then(response => {
@@ -219,6 +222,11 @@ class Scooter extends Client {
 
     get disabled() {
         return this._disabled;
+    }
+
+    initiate(strategy: ScooterStrategy) {
+        this.strategy = strategy;
+        this.strategy.initiate();
     }
 }
 

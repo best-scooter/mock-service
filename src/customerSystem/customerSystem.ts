@@ -14,6 +14,9 @@ import PreparedCustomerStrategy from '../classes/PreparedCustomerStrategy';
 import helpers from '../utils/helpers';
 import zoneStore from '../models/zoneStore';
 import CustomerStrategy from '../classes/CustomerStrategy';
+import PreparedScooterStrategy from '../classes/PreparedScooterStrategy';
+import ScooterStrategy from '../classes/ScooterStrategy';
+import SimpleScooterStrategy from '../classes/SimpleScooterStrategy';
 
 export default {
     /**
@@ -135,8 +138,8 @@ export default {
     },
 
     async createFakeScooters(amount: number, position: [number, number]) {
-        const thisCity = zoneStore.getCityZone(position)
-        const positions = helpers.getRandomPositions(thisCity, amount + 1)
+        const thisZone = zoneStore.getCommercialZone(position)
+        const positions = helpers.getRandomPositions(thisZone, amount + 1)
 
         for (let i = 1; i <= amount; i++) {
             const result = await apiRequests.postScooterToken(i, i.toString());
@@ -151,6 +154,20 @@ export default {
                 const scooter = new Scooter(connection, token)
                 scooter.position = positions[i]
                 clientStore.addScooter(scooter);
+                let strategy: ScooterStrategy;
+
+                if (i > EnvVars.NrOfStationaryScooters && i <= EnvVars.NrOfPreparedScooters) {
+                    console.log("scooter", scooter.scooterId, "prepared strategy")
+                    strategy = new PreparedScooterStrategy(scooter)
+                    scooter.initiate(strategy);
+                } else if (
+                    i > (EnvVars.NrOfStationaryScooters + EnvVars.NrOfPreparedScooters)
+                ) {
+                    console.log("scooter", scooter.scooterId, "simple strategy")
+                    strategy = new SimpleScooterStrategy(scooter)
+                    scooter.initiate(strategy);
+                }
+
 
                 apiRequests.delParking(scooter.scooterId, scooter.token).then(() => {
                     apiRequests.postParking(scooter.scooterId, scooter.position, scooter.token);

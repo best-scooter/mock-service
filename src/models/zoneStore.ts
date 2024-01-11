@@ -66,6 +66,23 @@ const zoneStore = {
         throw new NoZoneFoundError();
     },
 
+    getCommercialZone(position: [number, number]) {
+        const pt = turf.point(position);
+
+        for (const zone of this.zones) {
+            const poly = turf.polygon([[...zone.area, zone.area[0]]])
+
+            if (
+                zone.type.toLowerCase() === "commercial" &&
+                turf.inside(pt, poly)
+            ) {
+                return zone;
+            }
+        }
+
+        throw new NoZoneFoundError();
+    },
+
     isInParkingZone(position: [number, number]) {
         const pt = turf.point(position);
         let charging = false;

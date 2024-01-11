@@ -10,7 +10,9 @@
     "test": "nodemon --config ./spec/nodemon.json",
     "test:no-reloading": "npx ts-node --files -r tsconfig-paths/register ./spec",
     "docker:build": "npm run build && docker build -t bestscooter.azurecr.io/mock-service .",
-    "docker:push": "az acr login --name bestscooter && docker push bestscooter.azurecr.io/mock-service"
+    "docker:push": "az acr login --name bestscooter && docker push bestscooter.azurecr.io/mock-service",
+    "docker:build:alt": "npm run build && docker build -t missivaeak/bestscooter_mock-service:alt .",
+    "docker:push:alt": "docker push missivaeak/bestscooter_mock-service:alt"
   },
   "nodemonConfig": {
     "watch": [
