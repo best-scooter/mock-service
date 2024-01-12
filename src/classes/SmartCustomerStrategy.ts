@@ -32,19 +32,19 @@ class SmartCustomerStrategy extends CustomerStrategy {
 
     protected async main() {
         while (true) {
-            this.scooter = this.getNearbyScooter();
-            if (!this.scooter) {
+            const scooter = this.getNearbyScooter();
+            if (!scooter) {
                 await this.reinitiate("No nearby scooter found.")
                 continue;
             }
 
-            const goToScooterSuccess = await this.goToScooter(this.scooter);
+            const goToScooterSuccess = await this.goToScooter(scooter);
             if (!goToScooterSuccess) {
                 await this.reinitiate("Could not go to scooter.")
                 continue;
             }
 
-            const goToZoneSuccess = await this.goToZone(this.scooter);
+            const goToZoneSuccess = await this.goToZone(scooter);
             if (!goToZoneSuccess) {
                 await this.reinitiate("Could not go to parking zone.")
                 continue;
@@ -124,8 +124,8 @@ class SmartCustomerStrategy extends CustomerStrategy {
         const target = helpers.getCenter(targetZone.area);
         let route: Array<[number, number]>;
 
-        if (!this.scooter) {
-            throw new NoScooterFoundError();
+        if (!scooter.available) {
+            return false;
         }
 
         try {
@@ -141,13 +141,14 @@ class SmartCustomerStrategy extends CustomerStrategy {
             }
         }
 
-        this.trip = await this.startTrip(this.scooter);
+        this.scooter = scooter;
+        this.trip = await this.startTrip(scooter);
 
         await this.move(route, target);
 
         await this.trip.end();
         this.trip = null;
-        this.scooter.available = true;
+        scooter.available = true;
         this.scooter = null;
 
         return true;

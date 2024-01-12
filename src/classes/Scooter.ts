@@ -3,13 +3,8 @@ import jwt from 'jsonwebtoken';
 
 import EnvVars from "../constants/EnvVars";
 import Client from "./Client";
-import HardwareHelper from "../hardwareMock/model/hardwareHelper";
 import ApiRequests from "../models/apiRequests";
-import HardwareBuilder from "../hardwareMock/controller/hardwareBuilder";
-import ScooterHardware from "../hardwareMock/model/types/scooter";
-import Position from "../hardwareMock/model/types/position";
 import ScooterType from "../types/ScooterType";
-import hardwareHelper from "../hardwareMock/model/hardwareHelper";
 import ScooterStrategy from "./ScooterStrategy";
 
 // **** Variables **** //
@@ -31,7 +26,7 @@ class Scooter extends Client {
     _redLight: string = "off";
     currentSpeed: number = 0;
 
-    constructor(connection: connection, token: string) {
+    constructor(connection: connection, token: string, position: [number, number]) {
         super(connection, token)
 
         const payload = jwt.verify(token, EnvVars.JwtSecret);
@@ -43,45 +38,65 @@ class Scooter extends Client {
         this.scooterId = payload.scooterId;
         this.info = "Scooter " + payload.scooterId;
         this.strategy = null;
+        this._position = position;
 
-        const scooterData = ApiRequests.getScooter(this.scooterId, this.token)
+        ApiRequests.getScooter(this.scooterId, this.token)
             .then(response => {
-                this.available = true
+                // this.available = true
                 this.maxSpeed = (response.maxSpeed as number)
                 this.battery = (response.battery as number)
-                this._charging = (response.charging as boolean)
                 this._decomissioned = (response.decomissioned as boolean)
                 this._beingServiced = (response.beingServiced as boolean)
                 this._disabled = (response.disabled as boolean)
+                this.updateAvailable()
+
+                const scooterData = {
+                    positionX: this.position[1],
+                    positionY: this.position[0],
+                    battery: this.battery,
+                    charging: this.charging,
+                    available: this.available,
+                    decomissioned: this.decomissioned,
+                    beingServiced: this.beingServiced,
+                    disabled: this.disabled,
+                    currentSpeed: this.currentSpeed
+                }
+
+                this.connection.send(JSON.stringify({
+                    message: "scooter",
+                    scooterId: this.scooterId,
+                    ...scooterData
+                }));
+
+                ApiRequests.putScooter(this.scooterId, scooterData, this.token);
             }).catch((error) => {
                 throw error
             })
+    }
 
-        const positionGps: Position = {
-            x: this.position[1],
-            y: this.position[0]
+    updateAvailable() {
+        let available = false;
+
+        if (
+            !this._beingServiced &&
+            !this._charging &&
+            !this._decomissioned &&
+            !this._disabled
+        ) {
+            available = true;
         }
 
-        const hardware: ScooterHardware = {
-            id: this.scooterId,
-            battery: this.battery,
-            redLight: this._redLight,
-            speed: this.currentSpeed,
-            position: positionGps
-        }
-
-        HardwareBuilder.buildHardwareFile(hardware)
+        this._available = available;
     }
 
     set position(positionYX: [number, number]) {
         this._position = positionYX;
-
-        // Kommentera bort för att lyckas starta
-        const hardwareData = HardwareHelper.updatePosSpeedBatt(this.scooterId, positionYX, this.token)
-            .then(response => {
-                this.battery = (response.battery as number)
-                this.currentSpeed = (response.speed as number)
-            })
+        this.connection.send(JSON.stringify({
+            message: "scooter",
+            scooterId: this.scooterId,
+            positionY: positionYX[0],
+            positionX: positionYX[1]
+        }))
     }
 
     get position() {
@@ -89,18 +104,20 @@ class Scooter extends Client {
     }
 
     set available(value: boolean) {
+        if (this._available !== value) {
+            this.connection.send(JSON.stringify({
+                message: "scooter",
+                scooterId: this.scooterId,
+                available: value
+            }))
+        }
+
         this._available = value
 
         const data: ScooterType = {
             available: value
         }
         ApiRequests.putScooter(this.scooterId, data, this.token)
-
-        this.connection.send(JSON.stringify({
-            message: "scooter",
-            scooterId: this.scooterId,
-            available: value
-        }))
     }
 
     get available() {
@@ -108,36 +125,22 @@ class Scooter extends Client {
     }
 
     set charging(value: boolean) {
-        if (value == true) {
-            this._charging = value
-            this._available = false
-            this._redLight = "on"
+        this._charging = value
+        this._redLight = "off"
 
-            const data: ScooterType = {
-                charging: value,
-                available: false
-            }
+        this.updateAvailable()
 
-            HardwareHelper.chargeBattery(this, data, this._redLight)
-
-        } else if (value == false) {
-            this._charging = value
-            this._available = true
-            this._redLight = "off"
-
-            const data: ScooterType = {
-                charging: value,
-                available: true
-            }
-            ApiRequests.putScooter(this.scooterId, data, this.token)
-            hardwareHelper.updateLight(this.scooterId, this._redLight)
+        const data: ScooterType = {
+            charging: value,
+            available: this.available
         }
 
+        ApiRequests.putScooter(this.scooterId, data, this.token)
         this.connection.send(JSON.stringify({
             message: "scooter",
             scooterId: this.scooterId,
             charging: value,
-            // available: this._available
+            available: this.available
         }))
     }
 
@@ -146,25 +149,20 @@ class Scooter extends Client {
     }
 
     set decomissioned(value: boolean) {
-        if (value == true) {
-            this._decomissioned = value
-            this._available = false
-        } else if (value == false) {
-            this._decomissioned = value
-            this._available = true
-        }
+        this._decomissioned = value;
+        this.updateAvailable();
 
         const data: ScooterType = {
             decomissioned: value,
-            available: this._available
+            available: this.available
         }
         ApiRequests.putScooter(this.scooterId, data, this.token)
 
         this.connection.send(JSON.stringify({
             message: "scooter",
             scooterId: this.scooterId,
-            decomissioned: value,
-            available: this._available
+            decomissioned: this.decomissioned,
+            available: this.available
         }))
     }
 
@@ -173,25 +171,20 @@ class Scooter extends Client {
     }
 
     set beingServiced(value: boolean) {
-        if (value == true) {
-            this._beingServiced = value
-            this._available = false
-        } else if (value == false) {
-            this._beingServiced = value
-            this._available = true
-        }
+        this._beingServiced = value;
+        this.updateAvailable();
 
         const data: ScooterType = {
             beingServiced: value,
-            available: this._available
-        }
+            available: this.available
+        };
         ApiRequests.putScooter(this.scooterId, data, this.token)
 
         this.connection.send(JSON.stringify({
             message: "scooter",
             scooterId: this.scooterId,
-            beingServiced: value,
-            available: this._available
+            beingServiced: this.beingServiced,
+            available: this.available
         }))
     }
 
@@ -200,13 +193,9 @@ class Scooter extends Client {
     }
 
     set disabled(value: boolean) {
-        if (value == true) {
-            this._disabled = value
-            this._available = false
-        } else if (value == false) {
-            this._disabled = value
-            this._available = true
-        }
+
+        this._disabled = value;
+        this.updateAvailable();
 
         const data: ScooterType = {
             disabled: value
@@ -216,7 +205,8 @@ class Scooter extends Client {
         this.connection.send(JSON.stringify({
             message: "scooter",
             scooterId: this.scooterId,
-            disabled: value
+            disabled: this.disabled,
+            available: this.available
         }))
     }
 

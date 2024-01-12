@@ -41,16 +41,16 @@ function requestHandler(request: request) {
     }
 
     const conn = request.accept(null, request.origin);
-    const scooter = new Scooter(conn, token);
+    // const scooter = new Scooter(conn, token);
 
-    // Add the client to the client store
-    clientStore.addScooter(scooter);
-    logger.info('Connection ' + conn.remoteAddress + ' accepted.');
-    // conn.on('message', _onAllMessages);
-    conn.on('close', _onClose.bind({scooter}));
+    // // Add the client to the client store
+    // clientStore.addScooter(scooter);
+    // logger.info('Connection ' + conn.remoteAddress + ' accepted.');
+    // // conn.on('message', _onAllMessages);
+    // conn.on('close', _onClose.bind({scooter}));
 
-    // Main function to set up message logic
-    messageRouter(scooter);
+    // // Main function to set up message logic
+    // messageRouter(scooter);
 }
 
 // **** Exports **** //

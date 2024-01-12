@@ -98,10 +98,10 @@ export default {
         }
 
         // Initiate each customer
-        for (const customer of customers) {
+        for (let i = 0; i < customers.length; i++) {
             // Get random point and use as start position for the customer
-            const randomIndex = Math.floor(Math.random() * points.length)
-            const startPosition = points[randomIndex];
+            const startPosition = points[i];
+            const customer = customers[i]
             customer.position = startPosition;
 
             // Put the position in the database
@@ -142,48 +142,54 @@ export default {
         const positions = helpers.getRandomPositions(thisZone, amount + 1)
 
         for (let i = 1; i <= amount; i++) {
-            const result = await apiRequests.postScooterToken(i, i.toString());
-            const token = result.data.token;
-            const scooterWs = new WebSocket.client();
+            this._createFakeScooter(i, positions[i])
+        }
+    },
 
-            scooterWs.connect(EnvVars.WsHost, undefined, undefined, {
-                "sec-websocket-protocol": token
-            });
+    async _createFakeScooter (scooterId: number, position: [number, number]) {
+        const result = await apiRequests.postScooterToken(
+            scooterId, scooterId.toString()
+        );
+        const token = result.data.token;
+        const scooterWs = new WebSocket.client();
 
-            scooterWs.on('connect', (connection) => {
-                const scooter = new Scooter(connection, token)
-                scooter.position = positions[i]
-                clientStore.addScooter(scooter);
-                let strategy: ScooterStrategy;
+        scooterWs.connect(EnvVars.WsHost, undefined, undefined, {
+            "sec-websocket-protocol": token
+        });
 
-                if (i > EnvVars.NrOfStationaryScooters && i <= EnvVars.NrOfPreparedScooters) {
-                    console.log("scooter", scooter.scooterId, "prepared strategy")
-                    strategy = new PreparedScooterStrategy(scooter)
-                    scooter.initiate(strategy);
-                } else if (
-                    i > (EnvVars.NrOfStationaryScooters + EnvVars.NrOfPreparedScooters)
-                ) {
-                    console.log("scooter", scooter.scooterId, "simple strategy")
-                    strategy = new SimpleScooterStrategy(scooter)
-                    scooter.initiate(strategy);
-                }
+        scooterWs.on('connect', (connection) => {
+            const scooter = new Scooter(connection, token, position)
+            let strategy: ScooterStrategy;
 
+            clientStore.addScooter(scooter);
 
-                apiRequests.delParking(scooter.scooterId, scooter.token).then(() => {
-                    apiRequests.postParking(scooter.scooterId, scooter.position, scooter.token);
-                }).catch((error) => {
-                    logger.err(error);
-                    apiRequests.postParking(scooter.scooterId, scooter.position, scooter.token);
-                })
+            if (
+                scooterId > EnvVars.NrOfStationaryScooters &&
+                scooterId <= EnvVars.NrOfPreparedScooters
+            ) {
+                strategy = new PreparedScooterStrategy(scooter)
+                scooter.initiate(strategy);
+            } else if (
+                scooterId > (EnvVars.NrOfStationaryScooters + EnvVars.NrOfPreparedScooters)
+            ) {
+                strategy = new SimpleScooterStrategy(scooter)
+                scooter.initiate(strategy);
+            }
 
-                connection.on('error', function (error) {
-                    logger.warn("Connection Error: " + error.toString());
-                });
+            apiRequests.delParking(scooter.scooterId, scooter.token).then(() => {
+                apiRequests.postParking(scooter.scooterId, scooter.position, scooter.token);
+            }).catch((error) => {
+                logger.err(error);
+                apiRequests.postParking(scooter.scooterId, scooter.position, scooter.token);
             })
 
-            scooterWs.on('connectFailed', function (error) {
-                logger.warn('Connect Error: ' + error.toString());
+            connection.on('error', function (error) {
+                logger.warn("Connection Error: " + error.toString());
             });
-        }
+        })
+
+        scooterWs.on('connectFailed', function (error) {
+            logger.warn('Connect Error: ' + error.toString());
+        });
     }
 }
