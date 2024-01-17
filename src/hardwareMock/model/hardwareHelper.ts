@@ -45,7 +45,10 @@ export default {
         const max = 0.02
         const batteryChange = this.getRandomNumber(min, max)
 
-        const newBattery = currentBattery - batteryChange
+        let newBattery = currentBattery - batteryChange
+        if (newBattery <= 0) {
+            newBattery = 0.5
+        } 
         hardwareBridge.writeNewBattery(scooterId, newBattery)
 
         return newBattery
