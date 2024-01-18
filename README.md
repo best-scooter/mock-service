@@ -1,6 +1,6 @@
 # mock-service
 
-För att mocka scootrar och kunder och deras rörelser.
+För att mocka scootrar och kunder och deras rörelser. Inställningar för simulation görs i .env-filer. Använd `env/example.env` som mall och namnge den efter NODE_ENV, t.ex. `development.env` eller `production.env`.
 
 ## Available Scripts
 
@@ -37,9 +37,6 @@ Kör production-builden (måste vara byggt först).
 Kör production-builden med en annan .env-fil.
 
 ### `npm run docker:build`
-
-Bygger appen och bygger imagen.
-
 ### `npm run docker:push`
 
-Pushar imagen till ACR.
+Bygger och pushar imagen. Ändra i package.json efter behov.
